@@ -40,6 +40,32 @@ input, select {
     box-sizing: border-box;
 }
 
+.item-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 120px auto;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.item-row input,
+.item-row select {
+    margin: 0;
+}
+
+.item-row button {
+    height: 42px;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+#adicionar-item {
+    margin: 8px 0 16px;
+}
+
 button, .btn {
     background: #dc2626;
     color: white;
@@ -113,4 +139,17 @@ button, .btn {
 
 .painel-card.preparo {
     border-color: #facc15;
+}
+
+@media (max-width: 720px) {
+    .grid,
+    .painel-grid,
+    .item-row {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }

@@ -28,4 +28,13 @@ public class ItemPedido {
     @ManyToOne
     @JoinColumn(name = "pedido_id")
     private Pedido pedido;
+
+    public void calcularSubtotal() {
+        if (precoUnitario == null || quantidade == null) {
+            subtotal = BigDecimal.ZERO;
+            return;
+        }
+
+        subtotal = precoUnitario.multiply(BigDecimal.valueOf(quantidade));
+    }
 }

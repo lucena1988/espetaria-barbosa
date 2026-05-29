@@ -8,7 +8,6 @@ import br.com.espetariabarbosa.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -28,27 +27,39 @@ public class PedidoService {
         );
     }
 
-    public Pedido criarPedido(String nomeCliente, String mesa, Long produtoId, Integer quantidade) {
-        Produto produto = produtoService.buscarPorId(produtoId);
-
-        BigDecimal subtotal = produto.getPreco().multiply(BigDecimal.valueOf(quantidade));
-
+    public Pedido criarPedido(String nomeCliente, String mesa, List<Long> produtoIds, List<Integer> quantidades) {
         Pedido pedido = Pedido.builder()
                 .nomeCliente(nomeCliente)
                 .mesa(mesa)
                 .status(StatusPedido.RECEBIDO)
-                .total(subtotal)
                 .build();
 
-        ItemPedido item = ItemPedido.builder()
-                .nomeProduto(produto.getNome())
-                .quantidade(quantidade)
-                .precoUnitario(produto.getPreco())
-                .subtotal(subtotal)
-                .pedido(pedido)
-                .build();
+        if (produtoIds == null || quantidades == null || produtoIds.isEmpty()) {
+            throw new IllegalArgumentException("Informe ao menos um produto para criar o pedido");
+        }
 
-        pedido.getItens().add(item);
+        for (int i = 0; i < produtoIds.size(); i++) {
+            Long produtoId = produtoIds.get(i);
+            Integer quantidade = i < quantidades.size() ? quantidades.get(i) : 0;
+
+            if (produtoId == null || quantidade == null || quantidade <= 0) {
+                continue;
+            }
+
+            Produto produto = produtoService.buscarPorId(produtoId);
+
+            ItemPedido item = ItemPedido.builder()
+                    .nomeProduto(produto.getNome())
+                    .quantidade(quantidade)
+                    .precoUnitario(produto.getPreco())
+                    .build();
+
+            pedido.adicionarItem(item);
+        }
+
+        if (pedido.getItens().isEmpty()) {
+            throw new IllegalArgumentException("Informe ao menos um item válido para criar o pedido");
+        }
 
         return pedidoRepository.save(pedido);
     }

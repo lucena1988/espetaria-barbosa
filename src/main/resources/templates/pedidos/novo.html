@@ -22,19 +22,63 @@
             <input name="nomeCliente" placeholder="Nome do cliente" required>
             <input name="mesa" placeholder="Mesa ou balcão. Ex: Mesa 01" required>
 
-            <select name="produtoId" required>
-                <option value="">Selecione o produto</option>
-                <option th:each="produto : ${produtos}"
-                        th:value="${produto.id}"
-                        th:text="${produto.nome + ' - R$ ' + produto.preco}">
-                </option>
-            </select>
+            <h2>Itens do pedido</h2>
 
-            <input name="quantidade" type="number" min="1" value="1" required>
+            <div id="itens-pedido">
+                <div class="item-row">
+                    <select name="produtoIds" required>
+                        <option value="">Selecione o produto</option>
+                        <option th:each="produto : ${produtos}"
+                                th:value="${produto.id}"
+                                th:text="${produto.nome + ' - R$ ' + produto.preco}">
+                        </option>
+                    </select>
+
+                    <input name="quantidades" type="number" min="1" value="1" required>
+                    <button class="btn-secondary remover-item" type="button">Remover</button>
+                </div>
+            </div>
+
+            <button class="btn-secondary" id="adicionar-item" type="button">Adicionar item</button>
 
             <button type="submit">Criar Pedido</button>
         </form>
     </div>
 </div>
+
+<script>
+    const itensPedido = document.getElementById('itens-pedido');
+    const adicionarItem = document.getElementById('adicionar-item');
+
+    function atualizarBotoesRemover() {
+        const linhas = itensPedido.querySelectorAll('.item-row');
+        linhas.forEach((linha) => {
+            const remover = linha.querySelector('.remover-item');
+            remover.disabled = linhas.length === 1;
+        });
+    }
+
+    adicionarItem.addEventListener('click', () => {
+        const novaLinha = itensPedido.querySelector('.item-row').cloneNode(true);
+        novaLinha.querySelector('select').value = '';
+        novaLinha.querySelector('input').value = 1;
+        itensPedido.appendChild(novaLinha);
+        atualizarBotoesRemover();
+    });
+
+    itensPedido.addEventListener('click', (event) => {
+        if (!event.target.classList.contains('remover-item')) {
+            return;
+        }
+
+        const linhas = itensPedido.querySelectorAll('.item-row');
+        if (linhas.length > 1) {
+            event.target.closest('.item-row').remove();
+            atualizarBotoesRemover();
+        }
+    });
+
+    atualizarBotoesRemover();
+</script>
 </body>
 </html>

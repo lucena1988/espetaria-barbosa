@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/pedidos")
@@ -31,9 +33,9 @@ public class PedidoController {
     @PostMapping
     public String criar(@RequestParam String nomeCliente,
                         @RequestParam String mesa,
-                        @RequestParam Long produtoId,
-                        @RequestParam Integer quantidade) {
-        pedidoService.criarPedido(nomeCliente, mesa, produtoId, quantidade);
+                        @RequestParam List<Long> produtoIds,
+                        @RequestParam List<Integer> quantidades) {
+        pedidoService.criarPedido(nomeCliente, mesa, produtoIds, quantidades);
         return "redirect:/pedidos";
     }
 

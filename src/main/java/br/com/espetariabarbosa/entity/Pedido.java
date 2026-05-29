@@ -32,17 +32,33 @@ public class Pedido {
 
     private BigDecimal total;
 
+    @Builder.Default
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> itens = new ArrayList<>();
 
+    public void adicionarItem(ItemPedido item) {
+        item.setPedido(this);
+        item.calcularSubtotal();
+        itens.add(item);
+        recalcularTotal();
+    }
+
+    public void recalcularTotal() {
+        total = itens.stream()
+                .map(ItemPedido::getSubtotal)
+                .filter(subtotal -> subtotal != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     @PrePersist
-    public void prePersist() {
-        criadoEm = LocalDateTime.now();
+    @PreUpdate
+    public void antesDeSalvar() {
+        if (criadoEm == null) {
+            criadoEm = LocalDateTime.now();
+        }
         if (status == null) {
             status = StatusPedido.RECEBIDO;
         }
-        if (total == null) {
-            total = BigDecimal.ZERO;
-        }
+        recalcularTotal();
     }
 }
