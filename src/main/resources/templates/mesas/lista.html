@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mesas - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="navbar">
+    <strong>Espetaria Barbosa</strong>
+    <a href="/pedidos">Pedidos</a>
+    <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/mesas">Mesas</a>
+    <a href="/produtos">Produtos</a>
+    <a href="/cozinha">Cozinha</a>
+    <a href="/painel" target="_blank">Painel TV</a>
+</div>
+<div class="container">
+    <h1>Mesas</h1>
+
+    <div class="card">
+        <h2>Nova Mesa</h2>
+        <form method="post" action="/mesas">
+            <input name="numero" placeholder="Numero da mesa. Ex: Mesa 01" required>
+            <input name="descricao" placeholder="Descricao opcional. Ex: Area externa">
+            <button type="submit">Salvar Mesa</button>
+        </form>
+    </div>
+
+    <div class="grid">
+        <div class="card mesa-card" th:each="mesa : ${mesas}">
+            <h2 th:text="${mesa.numero}"></h2>
+            <p th:if="${mesa.descricao}" th:text="${mesa.descricao}"></p>
+            <p>Status: <span th:class="'status ' + ${mesa.status}" th:text="${mesa.status}"></span></p>
+
+            <form method="post" th:action="@{/mesas/{id}/status(id=${mesa.id})}">
+                <select name="status">
+                    <option th:each="status : ${statusMesas}"
+                            th:value="${status}"
+                            th:selected="${status == mesa.status}"
+                            th:text="${status}">
+                    </option>
+                </select>
+                <button type="submit">Atualizar</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

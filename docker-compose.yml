@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: espetaria-barbosa-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: espetaria_barbosa
+      DB_USER: espetaria
+      DB_PASSWORD: espetaria
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: espetaria-barbosa-db
+    environment:
+      POSTGRES_DB: espetaria_barbosa
+      POSTGRES_USER: espetaria
+      POSTGRES_PASSWORD: espetaria
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U espetaria -d espetaria_barbosa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
