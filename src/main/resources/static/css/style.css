@@ -47,6 +47,7 @@ body::before {
     display: flex;
     gap: 16px;
     justify-content: space-between;
+    margin-bottom: 18px;
 }
 
 .muted {
@@ -246,6 +247,131 @@ button, .btn {
     text-align: center;
 }
 
+.dashboard-metrics {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 16px;
+}
+
+.dashboard-filter {
+    align-items: end;
+    background: rgba(31, 41, 55, 0.92);
+    border: 1px solid #374151;
+    border-radius: 10px;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 180px 220px auto auto;
+    margin-bottom: 16px;
+    padding: 14px;
+}
+
+.dashboard-filter label {
+    color: #d1d5db;
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.dashboard-filter input,
+.dashboard-filter select {
+    margin: 0;
+}
+
+.dashboard-filter button,
+.dashboard-filter .btn {
+    height: 42px;
+    line-height: 22px;
+}
+
+.metric-card {
+    background: rgba(31, 41, 55, 0.92);
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+.metric-card > span {
+    color: #d1d5db;
+    display: block;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.metric-card strong {
+    color: #facc15;
+    display: block;
+    font-size: 28px;
+    min-height: 34px;
+}
+
+.privacy-toggle {
+    align-items: center;
+    background: #374151;
+    display: inline-flex;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.privacy-toggle[aria-pressed="true"] {
+    background: #7f1d1d;
+}
+
+.privacy-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.values-hidden .sensitive-value {
+    letter-spacing: 2px;
+}
+
+.dashboard-content {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+}
+
+.ranking-list {
+    display: grid;
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ranking-list li {
+    align-items: center;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 36px 1fr auto;
+    padding: 12px;
+}
+
+.ranking-position {
+    align-items: center;
+    background: #7f1d1d;
+    border-radius: 999px;
+    display: inline-flex;
+    font-weight: bold;
+    height: 28px;
+    justify-content: center;
+    width: 28px;
+}
+
+.dashboard-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.dashboard-actions h2 {
+    margin-bottom: 4px;
+}
+
 .painel-body {
     background: #030712;
 }
@@ -295,6 +421,9 @@ button, .btn {
     .grid,
     .painel-grid,
     .kitchen-board,
+    .dashboard-metrics,
+    .dashboard-content,
+    .dashboard-filter,
     .item-row {
         grid-template-columns: 1fr;
     }
