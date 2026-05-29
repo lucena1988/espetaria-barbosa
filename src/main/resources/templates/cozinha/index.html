@@ -132,5 +132,18 @@
         </section>
     </div>
 </div>
+<script th:src="@{/webjars/sockjs-client/1.5.1/sockjs.min.js}"></script>
+<script th:src="@{/webjars/stomp-websocket/2.3.4/stomp.min.js}"></script>
+<script>
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = null;
+
+    stompClient.connect({}, () => {
+        stompClient.subscribe('/topic/pedidos', () => {
+            window.location.reload();
+        });
+    });
+</script>
 </body>
 </html>

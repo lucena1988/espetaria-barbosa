@@ -17,6 +17,7 @@ public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProdutoService produtoService;
+    private final PedidoWebSocketService pedidoWebSocketService;
 
     public List<Pedido> listarTodos() {
         return pedidoRepository.findAllByOrderByCriadoEmDesc();
@@ -64,13 +65,16 @@ public class PedidoService {
             throw new IllegalArgumentException("Informe ao menos um item válido para criar o pedido");
         }
 
-        return pedidoRepository.save(pedido);
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
+        return pedidoSalvo;
     }
 
     public void alterarStatus(Long pedidoId, StatusPedido status) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
         pedido.setStatus(status);
-        pedidoRepository.save(pedido);
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
     }
 }
