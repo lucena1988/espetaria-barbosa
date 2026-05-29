@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel TV - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <meta http-equiv="refresh" content="5">
+</head>
+<body class="painel-body">
+<h1 class="painel-title">🍢 Espetaria Barbosa</h1>
+
+<div class="painel-grid">
+    <div class="painel-col">
+        <h2>EM PREPARO</h2>
+
+        <div class="painel-card preparo"
+             th:each="pedido : ${pedidos}"
+             th:if="${pedido.status.name() == 'RECEBIDO' or pedido.status.name() == 'EM_PREPARO'}">
+            <strong>#<span th:text="${pedido.id}"></span></strong>
+            <div th:text="${pedido.nomeCliente}"></div>
+            <small th:text="${pedido.mesa}"></small>
+        </div>
+    </div>
+
+    <div class="painel-col">
+        <h2>PRONTO</h2>
+
+        <div class="painel-card pronto"
+             th:each="pedido : ${pedidos}"
+             th:if="${pedido.status.name() == 'PRONTO'}">
+            <strong>#<span th:text="${pedido.id}"></span></strong>
+            <div th:text="${pedido.nomeCliente}"></div>
+            <small>Retire seu pedido</small>
+        </div>
+    </div>
+</div>
+</body>
+</html>

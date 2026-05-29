@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Pedido - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="navbar">
+    <strong>🍢 Espetaria Barbosa</strong>
+    <a href="/pedidos">Pedidos</a>
+    <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/produtos">Produtos</a>
+    <a href="/cozinha">Cozinha</a>
+    <a href="/painel" target="_blank">Painel TV</a>
+</div>
+<div class="container">
+    <h1>Novo Pedido</h1>
+
+    <div class="card">
+        <form method="post" action="/pedidos">
+            <input name="nomeCliente" placeholder="Nome do cliente" required>
+            <input name="mesa" placeholder="Mesa ou balcão. Ex: Mesa 01" required>
+
+            <select name="produtoId" required>
+                <option value="">Selecione o produto</option>
+                <option th:each="produto : ${produtos}"
+                        th:value="${produto.id}"
+                        th:text="${produto.nome + ' - R$ ' + produto.preco}">
+                </option>
+            </select>
+
+            <input name="quantidade" type="number" min="1" value="1" required>
+
+            <button type="submit">Criar Pedido</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

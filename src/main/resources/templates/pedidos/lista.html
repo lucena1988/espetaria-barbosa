@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pedidos - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="navbar">
+    <strong>🍢 Espetaria Barbosa</strong>
+    <a href="/pedidos">Pedidos</a>
+    <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/produtos">Produtos</a>
+    <a href="/cozinha">Cozinha</a>
+    <a href="/painel" target="_blank">Painel TV</a>
+</div>
+<div class="container">
+    <h1>Pedidos</h1>
+    <a class="btn" href="/pedidos/novo">Novo Pedido</a>
+
+    <div class="card" th:each="pedido : ${pedidos}">
+        <h2>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h2>
+        <p>Mesa: <span th:text="${pedido.mesa}"></span></p>
+        <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
+        <p>Total: R$ <span th:text="${pedido.total}"></span></p>
+
+        <ul>
+            <li th:each="item : ${pedido.itens}">
+                <span th:text="${item.quantidade}"></span>x
+                <span th:text="${item.nomeProduto}"></span>
+                - R$ <span th:text="${item.subtotal}"></span>
+            </li>
+        </ul>
+
+        <form method="post" th:action="@{/pedidos/{id}/status(id=${pedido.id})}">
+            <select name="status">
+                <option value="RECEBIDO">Recebido</option>
+                <option value="EM_PREPARO">Em preparo</option>
+                <option value="PRONTO">Pronto</option>
+                <option value="ENTREGUE">Entregue</option>
+                <option value="CANCELADO">Cancelado</option>
+            </select>
+            <button type="submit">Alterar Status</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

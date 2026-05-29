@@ -1,0 +1,116 @@
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111827;
+    color: #f9fafb;
+}
+
+.navbar {
+    background: #7f1d1d;
+    padding: 16px 32px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.navbar a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.container {
+    padding: 32px;
+}
+
+.card {
+    background: #1f2937;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid #374151;
+}
+
+input, select {
+    padding: 12px;
+    border-radius: 8px;
+    border: 0;
+    margin: 6px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button, .btn {
+    background: #dc2626;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.btn-secondary {
+    background: #374151;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.status {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.RECEBIDO { background: #f59e0b; color: #111827; }
+.EM_PREPARO { background: #2563eb; color: white; }
+.PRONTO { background: #16a34a; color: white; }
+.ENTREGUE { background: #6b7280; color: white; }
+.CANCELADO { background: #991b1b; color: white; }
+
+.painel-body {
+    background: #030712;
+}
+
+.painel-title {
+    text-align: center;
+    font-size: 48px;
+    color: #facc15;
+    margin-top: 24px;
+}
+
+.painel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 32px;
+}
+
+.painel-col h2 {
+    font-size: 36px;
+    text-align: center;
+}
+
+.painel-card {
+    background: #111827;
+    border: 3px solid #374151;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    font-size: 28px;
+}
+
+.painel-card.pronto {
+    border-color: #22c55e;
+}
+
+.painel-card.preparo {
+    border-color: #facc15;
+}
