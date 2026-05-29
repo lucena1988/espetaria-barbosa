@@ -4,6 +4,7 @@ import br.com.espetariabarbosa.entity.ItemPedido;
 import br.com.espetariabarbosa.entity.Pedido;
 import br.com.espetariabarbosa.entity.Produto;
 import br.com.espetariabarbosa.enums.StatusPedido;
+import br.com.espetariabarbosa.enums.TipoAtendimento;
 import br.com.espetariabarbosa.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,12 @@ public class PedidoService {
         );
     }
 
-    public Pedido criarPedido(String nomeCliente, String mesa, List<Long> produtoIds, List<Integer> quantidades) {
+    public Pedido criarPedido(String nomeCliente, String mesa, TipoAtendimento tipoAtendimento,
+                              List<Long> produtoIds, List<Integer> quantidades) {
         Pedido pedido = Pedido.builder()
                 .nomeCliente(nomeCliente)
                 .mesa(mesa)
+                .tipoAtendimento(tipoAtendimento)
                 .status(StatusPedido.RECEBIDO)
                 .build();
 

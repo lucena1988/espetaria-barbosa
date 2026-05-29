@@ -10,6 +10,7 @@
     <strong>🍢 Espetaria Barbosa</strong>
     <a href="/pedidos">Pedidos</a>
     <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/mesas">Mesas</a>
     <a href="/produtos">Produtos</a>
     <a href="/cozinha">Cozinha</a>
     <a href="/painel" target="_blank">Painel TV</a>
@@ -20,7 +21,8 @@
 
     <div class="card" th:each="pedido : ${pedidos}">
         <h2>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h2>
-        <p>Mesa: <span th:text="${pedido.mesa}"></span></p>
+        <p>Atendimento: <span th:text="${pedido.tipoAtendimento}"></span></p>
+        <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
         <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
         <p>Total: R$ <span th:text="${pedido.total}"></span></p>
 

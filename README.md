@@ -31,10 +31,49 @@ http://localhost:8080
 
 - Pedidos: `http://localhost:8080/pedidos`
 - Novo pedido: `http://localhost:8080/pedidos/novo`
+- Mesas: `http://localhost:8080/mesas`
 - Produtos: `http://localhost:8080/produtos`
 - Cozinha: `http://localhost:8080/cozinha`
 - Painel TV: `http://localhost:8080/painel`
 - H2 Console: `http://localhost:8080/h2-console`
+
+## Como executar com Docker
+
+Suba a aplicacao e o PostgreSQL:
+
+```bash
+docker compose up --build
+```
+
+Acesse:
+
+```text
+http://localhost:8080
+```
+
+Para parar os containers:
+
+```bash
+docker compose down
+```
+
+Para apagar tambem os dados locais do PostgreSQL:
+
+```bash
+docker compose down -v
+```
+
+## Banco PostgreSQL no Docker
+
+Use:
+
+```text
+Host: localhost
+Porta: 5432
+Database: espetaria_barbosa
+User: espetaria
+Password: espetaria
+```
 
 ## Banco H2
 

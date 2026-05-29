@@ -1,6 +1,7 @@
 package br.com.espetariabarbosa.entity;
 
 import br.com.espetariabarbosa.enums.StatusPedido;
+import br.com.espetariabarbosa.enums.TipoAtendimento;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,9 @@ public class Pedido {
     private String nomeCliente;
 
     private String mesa;
+
+    @Enumerated(EnumType.STRING)
+    private TipoAtendimento tipoAtendimento;
 
     @Enumerated(EnumType.STRING)
     private StatusPedido status;
@@ -58,6 +62,9 @@ public class Pedido {
         }
         if (status == null) {
             status = StatusPedido.RECEBIDO;
+        }
+        if (tipoAtendimento == null) {
+            tipoAtendimento = TipoAtendimento.MESA;
         }
         recalcularTotal();
     }

@@ -7,9 +7,10 @@
 </head>
 <body>
 <div class="navbar">
-    <strong>🍢 Espetaria Barbosa</strong>
+    <strong>Espetaria Barbosa</strong>
     <a href="/pedidos">Pedidos</a>
     <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/mesas">Mesas</a>
     <a href="/produtos">Produtos</a>
     <a href="/cozinha">Cozinha</a>
     <a href="/painel" target="_blank">Painel TV</a>
@@ -20,7 +21,26 @@
     <div class="card">
         <form method="post" action="/pedidos">
             <input name="nomeCliente" placeholder="Nome do cliente" required>
-            <input name="mesa" placeholder="Mesa ou balcão. Ex: Mesa 01" required>
+
+            <select id="tipo-atendimento" name="tipoAtendimento" required>
+                <option th:each="tipo : ${tiposAtendimento}"
+                        th:value="${tipo}"
+                        th:text="${tipo}">
+                </option>
+            </select>
+
+            <select id="mesa-select" name="mesa">
+                <option value="">Selecione a mesa</option>
+                <option th:each="mesa : ${mesas}"
+                        th:value="${mesa.numero}"
+                        th:text="${mesa.numero + ' - ' + mesa.status}">
+                </option>
+            </select>
+
+            <input id="referencia-atendimento"
+                   name="mesa"
+                   placeholder="Referencia. Ex: Balcao, telefone ou endereco"
+                   disabled>
 
             <h2>Itens do pedido</h2>
 
@@ -49,6 +69,9 @@
 <script>
     const itensPedido = document.getElementById('itens-pedido');
     const adicionarItem = document.getElementById('adicionar-item');
+    const tipoAtendimento = document.getElementById('tipo-atendimento');
+    const mesaSelect = document.getElementById('mesa-select');
+    const referenciaAtendimento = document.getElementById('referencia-atendimento');
 
     function atualizarBotoesRemover() {
         const linhas = itensPedido.querySelectorAll('.item-row');
@@ -56,6 +79,23 @@
             const remover = linha.querySelector('.remover-item');
             remover.disabled = linhas.length === 1;
         });
+    }
+
+    function atualizarCampoAtendimento() {
+        const pedidoMesa = tipoAtendimento.value === 'MESA';
+        mesaSelect.disabled = !pedidoMesa;
+        referenciaAtendimento.disabled = pedidoMesa;
+
+        if (pedidoMesa) {
+            referenciaAtendimento.value = '';
+            mesaSelect.required = true;
+            referenciaAtendimento.required = false;
+            return;
+        }
+
+        mesaSelect.value = '';
+        mesaSelect.required = false;
+        referenciaAtendimento.required = true;
     }
 
     adicionarItem.addEventListener('click', () => {
@@ -78,7 +118,9 @@
         }
     });
 
+    tipoAtendimento.addEventListener('change', atualizarCampoAtendimento);
     atualizarBotoesRemover();
+    atualizarCampoAtendimento();
 </script>
 </body>
 </html>

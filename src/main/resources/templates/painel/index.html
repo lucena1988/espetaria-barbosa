@@ -18,7 +18,7 @@
              th:if="${pedido.status.name() == 'RECEBIDO' or pedido.status.name() == 'EM_PREPARO'}">
             <strong>#<span th:text="${pedido.id}"></span></strong>
             <div th:text="${pedido.nomeCliente}"></div>
-            <small th:text="${pedido.mesa}"></small>
+            <small th:text="${pedido.tipoAtendimento + ' - ' + pedido.mesa}"></small>
         </div>
     </div>
 
