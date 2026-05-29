@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="navbar">
+    <strong>Espetaria Barbosa</strong>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pedidos">Pedidos</a>
+    <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/mesas">Mesas</a>
+    <a href="/produtos">Produtos</a>
+    <a href="/cozinha">Cozinha</a>
+    <a href="/painel" target="_blank">Painel TV</a>
+</div>
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>Dashboard</h1>
+            <span class="muted">Resumo do periodo: <span th:text="${resumo.periodoLabel}"></span></span>
+        </div>
+        <button class="privacy-toggle" id="privacy-toggle" type="button" aria-pressed="false" title="Ocultar valores">
+            <span class="privacy-icon" aria-hidden="true">O</span>
+            <span id="privacy-toggle-label">Ocultar valores</span>
+        </button>
+    </div>
+
+    <form class="dashboard-filter" method="get" action="/dashboard">
+        <div>
+            <label for="periodo">Periodo</label>
+            <select id="periodo" name="periodo">
+                <option value="dia" th:selected="${resumo.tipoPeriodo == 'dia'}">Dia</option>
+                <option value="mes" th:selected="${resumo.tipoPeriodo == 'mes'}">Mes</option>
+            </select>
+        </div>
+
+        <div class="filter-field" id="campo-data">
+            <label for="data">Data</label>
+            <input id="data" name="data" type="date" th:value="${resumo.dataFiltro}">
+        </div>
+
+        <div class="filter-field" id="campo-mes">
+            <label for="mes">Mes</label>
+            <input id="mes" name="mes" type="month" th:value="${resumo.mesFiltro}">
+        </div>
+
+        <button type="submit">Pesquisar</button>
+        <a class="btn btn-secondary" href="/dashboard">Hoje</a>
+    </form>
+
+    <section class="dashboard-metrics">
+        <div class="metric-card">
+            <span>Vendas no periodo</span>
+            <strong class="sensitive-value">R$ <span th:text="${resumo.vendasDoPeriodo}"></span></strong>
+        </div>
+
+        <div class="metric-card">
+            <span>Pedidos no periodo</span>
+            <strong class="sensitive-value" th:text="${resumo.pedidosDoPeriodo}"></strong>
+        </div>
+
+        <div class="metric-card">
+            <span>Ticket medio</span>
+            <strong class="sensitive-value">R$ <span th:text="${resumo.ticketMedio}"></span></strong>
+        </div>
+
+        <div class="metric-card">
+            <span>Faturamento do mes</span>
+            <strong class="sensitive-value">R$ <span th:text="${resumo.faturamentoMensal}"></span></strong>
+        </div>
+
+        <div class="metric-card">
+            <span>Pedidos em aberto</span>
+            <strong class="sensitive-value" th:text="${resumo.pedidosAbertos}"></strong>
+        </div>
+    </section>
+
+    <section class="dashboard-content">
+        <div class="card">
+            <h2>Produtos mais vendidos no periodo</h2>
+
+            <p class="empty-state" th:if="${#lists.isEmpty(resumo.produtosMaisVendidos)}">
+                Nenhum produto vendido neste periodo.
+            </p>
+
+            <ol class="ranking-list" th:if="${!#lists.isEmpty(resumo.produtosMaisVendidos)}">
+                <li th:each="produto, iter : ${resumo.produtosMaisVendidos}">
+                    <span class="ranking-position" th:text="${iter.count}"></span>
+                    <span th:text="${produto.nome}"></span>
+                    <strong class="sensitive-value"><span th:text="${produto.quantidade}"></span>x</strong>
+                </li>
+            </ol>
+        </div>
+
+        <div class="card dashboard-actions">
+            <h2>Acesso rapido</h2>
+            <a class="btn" href="/pedidos/novo">Novo pedido</a>
+            <a class="btn btn-secondary" href="/cozinha">Painel da cozinha</a>
+            <a class="btn btn-secondary" href="/mesas">Mesas</a>
+            <a class="btn btn-secondary" href="/produtos">Produtos</a>
+        </div>
+    </section>
+</div>
+<script>
+    const privacyToggle = document.getElementById('privacy-toggle');
+    const privacyToggleLabel = document.getElementById('privacy-toggle-label');
+    const privacyIcon = privacyToggle.querySelector('.privacy-icon');
+    const sensitiveValues = document.querySelectorAll('.sensitive-value');
+    const periodo = document.getElementById('periodo');
+    const campoData = document.getElementById('campo-data');
+    const campoMes = document.getElementById('campo-mes');
+    const data = document.getElementById('data');
+    const mes = document.getElementById('mes');
+
+    function aplicarPrivacidade(ocultar) {
+        document.body.classList.toggle('values-hidden', ocultar);
+        privacyToggle.setAttribute('aria-pressed', String(ocultar));
+        privacyToggle.title = ocultar ? 'Mostrar valores' : 'Ocultar valores';
+        privacyToggleLabel.textContent = ocultar ? 'Mostrar valores' : 'Ocultar valores';
+        privacyIcon.textContent = ocultar ? '-' : 'O';
+        localStorage.setItem('dashboardValoresOcultos', String(ocultar));
+
+        sensitiveValues.forEach((valor) => {
+            if (!valor.dataset.originalValue) {
+                valor.dataset.originalValue = valor.textContent;
+            }
+            valor.textContent = ocultar ? '****' : valor.dataset.originalValue;
+        });
+    }
+
+    function alternarFiltroPeriodo() {
+        const filtroMensal = periodo.value === 'mes';
+        campoData.hidden = filtroMensal;
+        campoMes.hidden = !filtroMensal;
+        data.disabled = filtroMensal;
+        mes.disabled = !filtroMensal;
+    }
+
+    privacyToggle.addEventListener('click', () => {
+        aplicarPrivacidade(!document.body.classList.contains('values-hidden'));
+    });
+    periodo.addEventListener('change', alternarFiltroPeriodo);
+
+    alternarFiltroPeriodo();
+    aplicarPrivacidade(localStorage.getItem('dashboardValoresOcultos') === 'true');
+</script>
+</body>
+</html>
