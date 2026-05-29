@@ -16,7 +16,16 @@ public class CozinhaController {
 
     @GetMapping
     public String cozinha(Model model) {
-        model.addAttribute("pedidos", pedidoService.listarPainel());
+        var pedidos = pedidoService.listarPainel();
+        model.addAttribute("pedidosRecebidos", pedidos.stream()
+                .filter(pedido -> pedido.getStatus() == StatusPedido.RECEBIDO)
+                .toList());
+        model.addAttribute("pedidosEmPreparo", pedidos.stream()
+                .filter(pedido -> pedido.getStatus() == StatusPedido.EM_PREPARO)
+                .toList());
+        model.addAttribute("pedidosProntos", pedidos.stream()
+                .filter(pedido -> pedido.getStatus() == StatusPedido.PRONTO)
+                .toList());
         return "cozinha/index";
     }
 

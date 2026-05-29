@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="navbar">
-    <strong>🍢 Espetaria Barbosa</strong>
+    <strong>Espetaria Barbosa</strong>
     <a href="/pedidos">Pedidos</a>
     <a href="/pedidos/novo">Novo Pedido</a>
     <a href="/mesas">Mesas</a>
@@ -17,32 +17,118 @@
     <a href="/painel" target="_blank">Painel TV</a>
 </div>
 <div class="container">
-    <h1>Painel da Cozinha</h1>
+    <div class="page-header">
+        <h1>Painel da Cozinha</h1>
+        <span class="muted">Atualiza automaticamente a cada 5 segundos</span>
+    </div>
 
-    <div class="grid">
-        <div class="card" th:each="pedido : ${pedidos}">
-            <h2>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h2>
-            <p>Atendimento: <span th:text="${pedido.tipoAtendimento}"></span></p>
-            <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
-            <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
+    <div class="kitchen-board">
+        <section class="kitchen-column">
+            <header class="kitchen-column-header recebido">
+                <h2>Recebidos</h2>
+                <span th:text="${#lists.size(pedidosRecebidos)}"></span>
+            </header>
 
-            <ul>
-                <li th:each="item : ${pedido.itens}">
-                    <span th:text="${item.quantidade}"></span>x
-                    <span th:text="${item.nomeProduto}"></span>
-                </li>
-            </ul>
+            <p class="empty-state" th:if="${#lists.isEmpty(pedidosRecebidos)}">Nenhum pedido recebido.</p>
 
-            <form method="post" th:action="@{/cozinha/{id}/status(id=${pedido.id})}">
-                <select name="status">
-                    <option value="EM_PREPARO">Em preparo</option>
-                    <option value="PRONTO">Pronto</option>
-                    <option value="ENTREGUE">Entregue</option>
-                    <option value="CANCELADO">Cancelado</option>
-                </select>
-                <button type="submit">Atualizar</button>
-            </form>
-        </div>
+            <article class="kitchen-card" th:each="pedido : ${pedidosRecebidos}">
+                <div class="kitchen-card-top">
+                    <h3>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h3>
+                    <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span>
+                </div>
+                <p>
+                    <span th:text="${pedido.tipoAtendimento}"></span>
+                    <span th:if="${pedido.mesa}"> - </span>
+                    <span th:text="${pedido.mesa}"></span>
+                </p>
+                <ul class="kitchen-items">
+                    <li th:each="item : ${pedido.itens}">
+                        <strong th:text="${item.quantidade}"></strong>x
+                        <span th:text="${item.nomeProduto}"></span>
+                    </li>
+                </ul>
+                <div class="action-row">
+                    <form method="post" th:action="@{/cozinha/{id}/status(id=${pedido.id})}">
+                        <input type="hidden" name="status" value="EM_PREPARO">
+                        <button type="submit">Iniciar preparo</button>
+                    </form>
+                    <form method="post" th:action="@{/cozinha/{id}/status(id=${pedido.id})}">
+                        <input type="hidden" name="status" value="CANCELADO">
+                        <button class="btn-secondary" type="submit">Cancelar</button>
+                    </form>
+                </div>
+            </article>
+        </section>
+
+        <section class="kitchen-column">
+            <header class="kitchen-column-header preparo">
+                <h2>Em preparo</h2>
+                <span th:text="${#lists.size(pedidosEmPreparo)}"></span>
+            </header>
+
+            <p class="empty-state" th:if="${#lists.isEmpty(pedidosEmPreparo)}">Nada em preparo agora.</p>
+
+            <article class="kitchen-card" th:each="pedido : ${pedidosEmPreparo}">
+                <div class="kitchen-card-top">
+                    <h3>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h3>
+                    <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span>
+                </div>
+                <p>
+                    <span th:text="${pedido.tipoAtendimento}"></span>
+                    <span th:if="${pedido.mesa}"> - </span>
+                    <span th:text="${pedido.mesa}"></span>
+                </p>
+                <ul class="kitchen-items">
+                    <li th:each="item : ${pedido.itens}">
+                        <strong th:text="${item.quantidade}"></strong>x
+                        <span th:text="${item.nomeProduto}"></span>
+                    </li>
+                </ul>
+                <div class="action-row">
+                    <form method="post" th:action="@{/cozinha/{id}/status(id=${pedido.id})}">
+                        <input type="hidden" name="status" value="PRONTO">
+                        <button type="submit">Marcar pronto</button>
+                    </form>
+                    <form method="post" th:action="@{/cozinha/{id}/status(id=${pedido.id})}">
+                        <input type="hidden" name="status" value="CANCELADO">
+                        <button class="btn-secondary" type="submit">Cancelar</button>
+                    </form>
+                </div>
+            </article>
+        </section>
+
+        <section class="kitchen-column">
+            <header class="kitchen-column-header pronto">
+                <h2>Prontos</h2>
+                <span th:text="${#lists.size(pedidosProntos)}"></span>
+            </header>
+
+            <p class="empty-state" th:if="${#lists.isEmpty(pedidosProntos)}">Nenhum pedido pronto.</p>
+
+            <article class="kitchen-card" th:each="pedido : ${pedidosProntos}">
+                <div class="kitchen-card-top">
+                    <h3>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h3>
+                    <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span>
+                </div>
+                <p>
+                    <span th:text="${pedido.tipoAtendimento}"></span>
+                    <span th:if="${pedido.mesa}"> - </span>
+                    <span th:text="${pedido.mesa}"></span>
+                </p>
+                <ul class="kitchen-items">
+                    <li th:each="item : ${pedido.itens}">
+                        <strong th:text="${item.quantidade}"></strong>x
+                        <span th:text="${item.nomeProduto}"></span>
+                    </li>
+                </ul>
+                <div class="action-row">
+                    <form method="post" th:action="@{/cozinha/{id}/status(id=${pedido.id})}">
+                        <input type="hidden" name="status" value="ENTREGUE">
+                        <button type="submit">Entregar</button>
+                    </form>
+                </div>
+            </article>
+        </section>
     </div>
 </div>
 </body>

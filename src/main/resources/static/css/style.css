@@ -42,6 +42,17 @@ body::before {
     z-index: 1;
 }
 
+.page-header {
+    align-items: baseline;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.muted {
+    color: #9ca3af;
+}
+
 .card {
     background: #1f2937;
     border-radius: 12px;
@@ -128,6 +139,113 @@ button, .btn {
     margin-top: 0;
 }
 
+.kitchen-board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.kitchen-column {
+    background: rgba(17, 24, 39, 0.86);
+    border: 1px solid #374151;
+    border-radius: 12px;
+    min-height: 420px;
+    padding: 12px;
+}
+
+.kitchen-column-header {
+    align-items: center;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 12px 14px;
+}
+
+.kitchen-column-header h2 {
+    font-size: 20px;
+    margin: 0;
+}
+
+.kitchen-column-header span {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    font-weight: bold;
+    min-width: 28px;
+    padding: 5px 8px;
+    text-align: center;
+}
+
+.kitchen-column-header.recebido {
+    background: #92400e;
+}
+
+.kitchen-column-header.preparo {
+    background: #1d4ed8;
+}
+
+.kitchen-column-header.pronto {
+    background: #15803d;
+}
+
+.kitchen-card {
+    background: #1f2937;
+    border: 1px solid #4b5563;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 14px;
+}
+
+.kitchen-card-top {
+    align-items: flex-start;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.kitchen-card h3 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.kitchen-card p {
+    color: #d1d5db;
+    margin: 10px 0;
+}
+
+.kitchen-items {
+    margin: 0 0 14px;
+    padding-left: 20px;
+}
+
+.kitchen-items li {
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+
+.action-row {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr 1fr;
+}
+
+.action-row form {
+    margin: 0;
+}
+
+.action-row button {
+    width: 100%;
+}
+
+.empty-state {
+    border: 1px dashed #4b5563;
+    border-radius: 8px;
+    color: #9ca3af;
+    margin: 0;
+    padding: 18px;
+    text-align: center;
+}
+
 .painel-body {
     background: #030712;
 }
@@ -176,8 +294,14 @@ button, .btn {
 @media (max-width: 720px) {
     .grid,
     .painel-grid,
+    .kitchen-board,
     .item-row {
         grid-template-columns: 1fr;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .navbar {
