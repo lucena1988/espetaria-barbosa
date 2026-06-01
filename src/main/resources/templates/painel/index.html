@@ -7,6 +7,7 @@
     <meta http-equiv="refresh" content="5">
 </head>
 <body class="painel-body">
+<button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false">Ativar som</button>
 <h1 class="painel-title">🍢 Espetaria Barbosa</h1>
 
 <div class="painel-grid">
@@ -15,7 +16,7 @@
 
         <div class="painel-card preparo"
              th:each="pedido : ${pedidos}"
-             th:if="${pedido.status.name() == 'RECEBIDO' or pedido.status.name() == 'EM_PREPARO'}">
+             th:if="${pedido.status.name() == 'EM_PREPARO'}">
             <strong>#<span th:text="${pedido.id}"></span></strong>
             <div th:text="${pedido.nomeCliente}"></div>
             <small th:text="${pedido.tipoAtendimento + ' - ' + pedido.mesa}"></small>
@@ -37,12 +38,90 @@
 <script th:src="@{/webjars/sockjs-client/1.5.1/sockjs.min.js}"></script>
 <script th:src="@{/webjars/stomp-websocket/2.3.4/stomp.min.js}"></script>
 <script>
+    const soundToggle = document.getElementById('sound-toggle');
+    let audioContext;
+    let soundEnabled = localStorage.getItem('painelSoundEnabled') === 'true';
+
+    function updateSoundButton() {
+        soundToggle.textContent = soundEnabled ? 'Som ligado' : 'Ativar som';
+        soundToggle.setAttribute('aria-pressed', soundEnabled.toString());
+    }
+
+    function getAudioContext() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        return audioContext;
+    }
+
+    function playReadyAlert() {
+        if (!soundEnabled) {
+            return;
+        }
+
+        const context = getAudioContext();
+        const start = context.currentTime;
+        const tones = [
+            { frequency: 784, offset: 0 },
+            { frequency: 1175, offset: 0.16 },
+            { frequency: 784, offset: 0.32 },
+            { frequency: 1175, offset: 0.48 },
+            { frequency: 988, offset: 0.76 },
+            { frequency: 1480, offset: 0.92 },
+            { frequency: 988, offset: 1.08 },
+            { frequency: 1480, offset: 1.24 }
+        ];
+
+        tones.forEach((tone) => {
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(tone.frequency, start + tone.offset);
+            gain.gain.setValueAtTime(0.001, start + tone.offset);
+            gain.gain.exponentialRampToValueAtTime(0.42, start + tone.offset + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + tone.offset + 0.12);
+
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            oscillator.start(start + tone.offset);
+            oscillator.stop(start + tone.offset + 0.14);
+        });
+    }
+
+    soundToggle.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('painelSoundEnabled', soundEnabled.toString());
+
+        if (soundEnabled) {
+            getAudioContext();
+            playReadyAlert();
+        }
+
+        updateSoundButton();
+    });
+
+    updateSoundButton();
+
     const socket = new SockJS('/ws');
     const stompClient = Stomp.over(socket);
     stompClient.debug = null;
 
     stompClient.connect({}, () => {
-        stompClient.subscribe('/topic/pedidos', () => {
+        stompClient.subscribe('/topic/pedidos', (message) => {
+            const evento = JSON.parse(message.body);
+
+            if (evento.status === 'PRONTO') {
+                playReadyAlert();
+                setTimeout(() => window.location.reload(), 900);
+                return;
+            }
+
             window.location.reload();
         });
     });

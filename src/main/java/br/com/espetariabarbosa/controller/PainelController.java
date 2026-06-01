@@ -14,7 +14,7 @@ public class PainelController {
 
     @GetMapping("/painel")
     public String painel(Model model) {
-        model.addAttribute("pedidos", pedidoService.listarPainel());
+        model.addAttribute("pedidos", pedidoService.listarPainelTv());
         return "painel/index";
     }
 }

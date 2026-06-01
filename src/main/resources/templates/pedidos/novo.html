@@ -11,6 +11,7 @@
     <a href="/dashboard">Dashboard</a>
     <a href="/pedidos">Pedidos</a>
     <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/clientes">Clientes</a>
     <a href="/mesas">Mesas</a>
     <a href="/produtos">Produtos</a>
     <a href="/cozinha">Cozinha</a>
@@ -21,7 +22,15 @@
 
     <div class="card">
         <form method="post" action="/pedidos">
-            <input name="nomeCliente" placeholder="Nome do cliente" required>
+            <select id="cliente-select" name="clienteId">
+                <option value="">Cliente avulso</option>
+                <option th:each="cliente : ${clientes}"
+                        th:value="${cliente.id}"
+                        th:text="${cliente.nome + ((cliente.telefone != null and !#strings.isEmpty(cliente.telefone)) ? ' - ' + cliente.telefone : '')}">
+                </option>
+            </select>
+
+            <input id="nome-cliente" name="nomeCliente" placeholder="Nome do cliente avulso" required>
 
             <select id="tipo-atendimento" name="tipoAtendimento" required>
                 <option th:each="tipo : ${tiposAtendimento}"
@@ -73,6 +82,8 @@
     const tipoAtendimento = document.getElementById('tipo-atendimento');
     const mesaSelect = document.getElementById('mesa-select');
     const referenciaAtendimento = document.getElementById('referencia-atendimento');
+    const clienteSelect = document.getElementById('cliente-select');
+    const nomeCliente = document.getElementById('nome-cliente');
 
     function atualizarBotoesRemover() {
         const linhas = itensPedido.querySelectorAll('.item-row');
@@ -99,6 +110,16 @@
         referenciaAtendimento.required = true;
     }
 
+    function atualizarCampoCliente() {
+        const clienteCadastrado = clienteSelect.value !== '';
+        nomeCliente.disabled = clienteCadastrado;
+        nomeCliente.required = !clienteCadastrado;
+
+        if (clienteCadastrado) {
+            nomeCliente.value = '';
+        }
+    }
+
     adicionarItem.addEventListener('click', () => {
         const novaLinha = itensPedido.querySelector('.item-row').cloneNode(true);
         novaLinha.querySelector('select').value = '';
@@ -120,8 +141,10 @@
     });
 
     tipoAtendimento.addEventListener('change', atualizarCampoAtendimento);
+    clienteSelect.addEventListener('change', atualizarCampoCliente);
     atualizarBotoesRemover();
     atualizarCampoAtendimento();
+    atualizarCampoCliente();
 </script>
 </body>
 </html>

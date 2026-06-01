@@ -22,6 +22,9 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    private Cliente cliente;
+
     private String nomeCliente;
 
     private String mesa;

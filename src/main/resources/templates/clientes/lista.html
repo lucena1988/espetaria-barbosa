@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Clientes - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="navbar">
+    <strong>Espetaria Barbosa</strong>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pedidos">Pedidos</a>
+    <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/clientes">Clientes</a>
+    <a href="/mesas">Mesas</a>
+    <a href="/produtos">Produtos</a>
+    <a href="/cozinha">Cozinha</a>
+    <a href="/painel" target="_blank">Painel TV</a>
+</div>
+<div class="container">
+    <h1>Clientes</h1>
+
+    <div class="card">
+        <h2>Novo Cliente</h2>
+        <form method="post" action="/clientes">
+            <input name="nome" placeholder="Nome do cliente" required>
+            <input name="telefone" placeholder="Telefone">
+            <input name="endereco" placeholder="Endereco">
+            <button type="submit">Salvar Cliente</button>
+        </form>
+    </div>
+
+    <p class="empty-state" th:if="${#lists.isEmpty(clientes)}">Nenhum cliente cadastrado.</p>
+
+    <div class="card" th:each="cliente : ${clientes}">
+        <h3 th:text="${cliente.nome}"></h3>
+        <p th:if="${cliente.telefone}">Telefone: <span th:text="${cliente.telefone}"></span></p>
+        <p th:if="${cliente.endereco}">Endereco: <span th:text="${cliente.endereco}"></span></p>
+        <p>Status: <span th:text="${cliente.ativo ? 'Ativo' : 'Inativo'}"></span></p>
+    </div>
+</div>
+</body>
+</html>

@@ -28,9 +28,13 @@ public class MesaService {
         return mesaRepository.save(mesa);
     }
 
-    public void alterarStatus(Long id, StatusMesa status) {
-        Mesa mesa = mesaRepository.findById(id)
+    public Mesa buscarPorId(Long id) {
+        return mesaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mesa nao encontrada"));
+    }
+
+    public void alterarStatus(Long id, StatusMesa status) {
+        Mesa mesa = buscarPorId(id);
         mesa.setStatus(status);
         mesaRepository.save(mesa);
     }

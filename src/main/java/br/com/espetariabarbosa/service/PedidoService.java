@@ -18,21 +18,51 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ProdutoService produtoService;
     private final PedidoWebSocketService pedidoWebSocketService;
+    private final ClienteService clienteService;
 
     public List<Pedido> listarTodos() {
         return pedidoRepository.findAllByOrderByCriadoEmDesc();
     }
 
-    public List<Pedido> listarPainel() {
+    public List<Pedido> listarAtivos() {
         return pedidoRepository.findByStatusInOrderByCriadoEmAsc(
                 List.of(StatusPedido.RECEBIDO, StatusPedido.EM_PREPARO, StatusPedido.PRONTO)
         );
     }
 
+    public List<Pedido> listarHistorico() {
+        return pedidoRepository.findByStatusInOrderByCriadoEmDesc(
+                List.of(StatusPedido.ENTREGUE, StatusPedido.CANCELADO)
+        );
+    }
+
+    public List<Pedido> listarPainel() {
+        return listarAtivos();
+    }
+
+    public List<Pedido> listarPainelTv() {
+        return pedidoRepository.findByStatusInOrderByCriadoEmAsc(
+                List.of(StatusPedido.EM_PREPARO, StatusPedido.PRONTO)
+        );
+    }
+
     public Pedido criarPedido(String nomeCliente, String mesa, TipoAtendimento tipoAtendimento,
                               List<Long> produtoIds, List<Integer> quantidades) {
+        return criarPedido(null, nomeCliente, mesa, tipoAtendimento, produtoIds, quantidades);
+    }
+
+    public Pedido criarPedido(Long clienteId, String nomeCliente, String mesa, TipoAtendimento tipoAtendimento,
+                              List<Long> produtoIds, List<Integer> quantidades) {
+        var cliente = clienteId != null ? clienteService.buscarPorId(clienteId) : null;
+        String nomeClientePedido = cliente != null ? cliente.getNome() : nomeCliente;
+
+        if (nomeClientePedido == null || nomeClientePedido.isBlank()) {
+            throw new IllegalArgumentException("Informe um cliente para criar o pedido");
+        }
+
         Pedido pedido = Pedido.builder()
-                .nomeCliente(nomeCliente)
+                .cliente(cliente)
+                .nomeCliente(nomeClientePedido)
                 .mesa(mesa)
                 .tipoAtendimento(tipoAtendimento)
                 .status(StatusPedido.RECEBIDO)

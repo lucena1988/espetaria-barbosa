@@ -140,6 +140,65 @@ button, .btn {
     margin-top: 0;
 }
 
+.qr-card {
+    align-items: center;
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+    margin: 14px 0;
+}
+
+.qr-card img {
+    background: white;
+    border-radius: 8px;
+    max-width: 160px;
+    padding: 8px;
+    width: 100%;
+}
+
+.public-menu {
+    margin: 0 auto;
+    max-width: 720px;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.public-menu-header {
+    margin-bottom: 18px;
+    text-align: center;
+}
+
+.public-menu-header strong {
+    color: #facc15;
+    display: block;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.public-menu-header h1 {
+    font-size: 34px;
+    margin: 0 0 8px;
+}
+
+.public-menu-header p {
+    color: #d1d5db;
+    margin: 0;
+}
+
+.public-order {
+    margin-bottom: 0;
+}
+
+.success-message {
+    background: #166534;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    padding: 14px;
+    text-align: center;
+}
+
 .kitchen-board {
     display: grid;
     grid-template-columns: repeat(3, minmax(260px, 1fr));
@@ -386,6 +445,17 @@ button, .btn {
     font-size: 48px;
     color: #facc15;
     margin-top: 24px;
+}
+
+.sound-toggle {
+    position: fixed;
+    right: 24px;
+    top: 24px;
+    z-index: 2;
+}
+
+.sound-toggle[aria-pressed="true"] {
+    background: #16a34a;
 }
 
 .painel-grid {

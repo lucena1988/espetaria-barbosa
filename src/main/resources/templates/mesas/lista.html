@@ -11,6 +11,7 @@
     <a href="/dashboard">Dashboard</a>
     <a href="/pedidos">Pedidos</a>
     <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/clientes">Clientes</a>
     <a href="/mesas">Mesas</a>
     <a href="/produtos">Produtos</a>
     <a href="/cozinha">Cozinha</a>
@@ -33,6 +34,12 @@
             <h2 th:text="${mesa.numero}"></h2>
             <p th:if="${mesa.descricao}" th:text="${mesa.descricao}"></p>
             <p>Status: <span th:class="'status ' + ${mesa.status}" th:text="${mesa.status}"></span></p>
+            <div class="qr-card">
+                <img th:src="@{/mesas/{id}/qrcode(id=${mesa.id})}" th:alt="${'QR Code ' + mesa.numero}">
+                <a class="btn btn-secondary" th:href="@{/cardapio/mesa/{id}(id=${mesa.id})}" target="_blank">
+                    Abrir cardapio
+                </a>
+            </div>
 
             <form method="post" th:action="@{/mesas/{id}/status(id=${mesa.id})}">
                 <select name="status">

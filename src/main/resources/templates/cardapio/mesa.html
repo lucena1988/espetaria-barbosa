@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cardapio - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<main class="public-menu">
+    <section class="public-menu-header">
+        <strong>Espetaria Barbosa</strong>
+        <h1>Cardapio Digital</h1>
+        <p>Pedido para <span th:text="${mesa.numero}"></span></p>
+    </section>
+
+    <div class="success-message" th:if="${sucesso}">
+        Pedido enviado para a cozinha.
+    </div>
+
+    <form class="public-order card" method="post" th:action="@{/cardapio/mesa/{id}/pedidos(id=${mesa.id})}">
+        <input name="nomeCliente" placeholder="Seu nome" required>
+
+        <h2>Itens do pedido</h2>
+        <div id="itens-pedido">
+            <div class="item-row">
+                <select name="produtoIds" required>
+                    <option value="">Selecione o produto</option>
+                    <option th:each="produto : ${produtos}"
+                            th:value="${produto.id}"
+                            th:text="${produto.nome + ' - R$ ' + produto.preco}">
+                    </option>
+                </select>
+
+                <input name="quantidades" type="number" min="1" value="1" required>
+                <button class="btn-secondary remover-item" type="button">Remover</button>
+            </div>
+        </div>
+
+        <button class="btn-secondary" id="adicionar-item" type="button">Adicionar item</button>
+        <button type="submit">Enviar pedido</button>
+    </form>
+</main>
+
+<script>
+    const itensPedido = document.getElementById('itens-pedido');
+    const adicionarItem = document.getElementById('adicionar-item');
+
+    function atualizarBotoesRemover() {
+        const linhas = itensPedido.querySelectorAll('.item-row');
+        linhas.forEach((linha) => {
+            linha.querySelector('.remover-item').disabled = linhas.length === 1;
+        });
+    }
+
+    adicionarItem.addEventListener('click', () => {
+        const novaLinha = itensPedido.querySelector('.item-row').cloneNode(true);
+        novaLinha.querySelector('select').value = '';
+        novaLinha.querySelector('input').value = 1;
+        itensPedido.appendChild(novaLinha);
+        atualizarBotoesRemover();
+    });
+
+    itensPedido.addEventListener('click', (event) => {
+        if (!event.target.classList.contains('remover-item')) {
+            return;
+        }
+
+        const linhas = itensPedido.querySelectorAll('.item-row');
+        if (linhas.length > 1) {
+            event.target.closest('.item-row').remove();
+            atualizarBotoesRemover();
+        }
+    });
+
+    atualizarBotoesRemover();
+</script>
+</body>
+</html>
