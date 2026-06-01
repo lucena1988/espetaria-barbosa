@@ -2,7 +2,7 @@
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Clientes - Espetaria Barbosa</title>
+    <title>Categorias - Espetaria Barbosa</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -23,25 +23,23 @@
     </form>
 </div>
 <div class="container">
-    <h1>Clientes</h1>
+    <h1>Categorias de Produtos</h1>
 
     <div class="card">
-        <h2>Novo Cliente</h2>
-        <form method="post" action="/clientes">
-            <input name="nome" placeholder="Nome do cliente" required>
-            <input name="telefone" placeholder="Telefone">
-            <input name="endereco" placeholder="Endereco">
-            <button type="submit">Salvar Cliente</button>
+        <h2>Nova Categoria</h2>
+        <form method="post" action="/categorias">
+            <input name="nome" placeholder="Nome da categoria. Ex: Espetos, Bebidas" required>
+            <input name="descricao" placeholder="Descricao opcional">
+            <button type="submit">Salvar Categoria</button>
         </form>
     </div>
 
-    <p class="empty-state" th:if="${#lists.isEmpty(clientes)}">Nenhum cliente cadastrado.</p>
+    <p class="empty-state" th:if="${#lists.isEmpty(categorias)}">Nenhuma categoria cadastrada.</p>
 
-    <div class="card" th:each="cliente : ${clientes}">
-        <h3 th:text="${cliente.nome}"></h3>
-        <p th:if="${cliente.telefone}">Telefone: <span th:text="${cliente.telefone}"></span></p>
-        <p th:if="${cliente.endereco}">Endereco: <span th:text="${cliente.endereco}"></span></p>
-        <p>Status: <span th:text="${cliente.ativo ? 'Ativo' : 'Inativo'}"></span></p>
+    <div class="card" th:each="categoria : ${categorias}">
+        <h3 th:text="${categoria.nome}"></h3>
+        <p th:if="${categoria.descricao}" th:text="${categoria.descricao}"></p>
+        <p>Status: <span th:text="${categoria.ativa ? 'Ativa' : 'Inativa'}"></span></p>
     </div>
 </div>
 </body>

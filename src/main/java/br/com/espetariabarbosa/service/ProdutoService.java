@@ -31,6 +31,9 @@ public class ProdutoService {
         if (produto.getEstoqueMinimo() == null) {
             produto.setEstoqueMinimo(5);
         }
+        if (produto.getCategoriaProduto() != null) {
+            produto.setCategoria(produto.getCategoriaProduto().getNome());
+        }
         return produtoRepository.save(produto);
     }
 

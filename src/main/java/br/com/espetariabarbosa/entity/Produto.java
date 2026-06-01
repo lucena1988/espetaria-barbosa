@@ -19,6 +19,9 @@ public class Produto {
 
     private String nome;
 
+    @ManyToOne
+    private CategoriaProduto categoriaProduto;
+
     private String categoria;
 
     private BigDecimal preco;

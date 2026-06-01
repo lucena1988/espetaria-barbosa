@@ -36,6 +36,47 @@ body::before {
     font-weight: bold;
 }
 
+.logout-form {
+    margin-left: auto;
+}
+
+.logout-form button {
+    padding: 8px 12px;
+}
+
+.login-page {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.login-card {
+    background: rgba(31, 41, 55, 0.94);
+    border: 1px solid #374151;
+    border-radius: 12px;
+    max-width: 380px;
+    padding: 28px;
+    width: 100%;
+}
+
+.login-card strong {
+    color: #facc15;
+    display: block;
+    font-size: 18px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.login-card h1 {
+    font-size: 28px;
+    margin: 0 0 18px;
+    text-align: center;
+}
+
 .container {
     padding: 32px;
     position: relative;

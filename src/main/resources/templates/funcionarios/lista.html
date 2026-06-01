@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Funcionarios - Espetaria Barbosa</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="navbar">
+    <strong>Espetaria Barbosa</strong>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/pedidos">Pedidos</a>
+    <a href="/pedidos/novo">Novo Pedido</a>
+    <a href="/clientes">Clientes</a>
+    <a href="/mesas">Mesas</a>
+    <a href="/categorias">Categorias</a>
+    <a href="/produtos">Produtos</a>
+    <a href="/funcionarios">Funcionarios</a>
+    <a href="/cozinha">Cozinha</a>
+    <a href="/painel" target="_blank">Painel TV</a>
+    <form class="logout-form" method="post" action="/logout">
+        <button class="btn-secondary" type="submit">Sair</button>
+    </form>
+</div>
+<div class="container">
+    <h1>Funcionarios</h1>
+
+    <div class="success-message" th:if="${param.sucesso}" th:text="${param.sucesso}"></div>
+    <div class="error-message" th:if="${param.erro}" th:text="${param.erro}"></div>
+
+    <div class="card">
+        <h2>Novo Funcionario</h2>
+        <form method="post" action="/funcionarios">
+            <input name="nome" placeholder="Nome" required>
+            <input name="username" placeholder="Usuario de login" required>
+            <input name="senha" type="password" placeholder="Senha" required>
+            <select name="perfil" required>
+                <option th:each="perfil : ${perfis}" th:value="${perfil}" th:text="${perfil}"></option>
+            </select>
+            <button type="submit">Cadastrar Funcionario</button>
+        </form>
+    </div>
+
+    <p class="empty-state" th:if="${#lists.isEmpty(funcionarios)}">Nenhum funcionario cadastrado.</p>
+
+    <div class="card" th:each="funcionario : ${funcionarios}">
+        <h3 th:text="${funcionario.nome}"></h3>
+        <p>Usuario: <span th:text="${funcionario.username}"></span></p>
+        <p>Perfil: <span th:text="${funcionario.perfil}"></span></p>
+        <p>Status: <span th:text="${funcionario.ativo ? 'Ativo' : 'Inativo'}"></span></p>
+    </div>
+</div>
+</body>
+</html>
