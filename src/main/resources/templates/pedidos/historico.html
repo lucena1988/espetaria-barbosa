@@ -32,6 +32,11 @@
         <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
         <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
         <p>Total: R$ <span th:text="${pedido.total}"></span></p>
+        <p th:if="${pedido.pagamento}">
+            Pagamento:
+            <span th:text="${pedido.pagamento.formaPagamento}"></span>
+            - R$ <span th:text="${pedido.pagamento.valor}"></span>
+        </p>
 
         <ul>
             <li th:each="item : ${pedido.itens}">

@@ -9,6 +9,7 @@ import br.com.espetariabarbosa.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,6 +47,11 @@ public class PedidoService {
         );
     }
 
+    public Pedido buscarPorId(Long pedidoId) {
+        return pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new RuntimeException("Pedido nao encontrado"));
+    }
+
     public Pedido criarPedido(String nomeCliente, String mesa, TipoAtendimento tipoAtendimento,
                               List<Long> produtoIds, List<Integer> quantidades) {
         return criarPedido(null, nomeCliente, mesa, tipoAtendimento, produtoIds, quantidades);
@@ -72,6 +78,8 @@ public class PedidoService {
             throw new IllegalArgumentException("Informe ao menos um produto para criar o pedido");
         }
 
+        List<ItemEstoque> itensEstoque = new ArrayList<>();
+
         for (int i = 0; i < produtoIds.size(); i++) {
             Long produtoId = produtoIds.get(i);
             Integer quantidade = i < quantidades.size() ? quantidades.get(i) : 0;
@@ -81,6 +89,10 @@ public class PedidoService {
             }
 
             Produto produto = produtoService.buscarPorId(produtoId);
+            if (!produto.possuiEstoque(quantidade)) {
+                throw new IllegalArgumentException("Estoque insuficiente para " + produto.getNome());
+            }
+            itensEstoque.add(new ItemEstoque(produto, quantidade));
 
             ItemPedido item = ItemPedido.builder()
                     .nomeProduto(produto.getNome())
@@ -92,8 +104,10 @@ public class PedidoService {
         }
 
         if (pedido.getItens().isEmpty()) {
-            throw new IllegalArgumentException("Informe ao menos um item válido para criar o pedido");
+            throw new IllegalArgumentException("Informe ao menos um item valido para criar o pedido");
         }
+
+        itensEstoque.forEach(item -> produtoService.baixarEstoque(item.produto(), item.quantidade()));
 
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
@@ -101,10 +115,18 @@ public class PedidoService {
     }
 
     public void alterarStatus(Long pedidoId, StatusPedido status) {
-        Pedido pedido = pedidoRepository.findById(pedidoId)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+        Pedido pedido = buscarPorId(pedidoId);
         pedido.setStatus(status);
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
+    }
+
+    public Pedido salvar(Pedido pedido) {
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
+        return pedidoSalvo;
+    }
+
+    private record ItemEstoque(Produto produto, Integer quantidade) {
     }
 }

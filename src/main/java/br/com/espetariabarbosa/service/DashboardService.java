@@ -1,7 +1,9 @@
 package br.com.espetariabarbosa.service;
 
 import br.com.espetariabarbosa.entity.ItemPedido;
+import br.com.espetariabarbosa.entity.Pagamento;
 import br.com.espetariabarbosa.entity.Pedido;
+import br.com.espetariabarbosa.enums.FormaPagamento;
 import br.com.espetariabarbosa.enums.StatusPedido;
 import br.com.espetariabarbosa.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -80,6 +83,51 @@ public class DashboardService {
         );
     }
 
+    public ExtratoFinanceiro gerarExtrato(String tipoPeriodo, LocalDate dataFiltro, YearMonth mesFiltro) {
+        List<Pedido> pedidos = pedidoRepository.findAll();
+        boolean filtroMensal = "mes".equalsIgnoreCase(tipoPeriodo);
+        LocalDate dataReferencia = dataFiltro == null ? LocalDate.now() : dataFiltro;
+        YearMonth mesReferencia = mesFiltro == null ? YearMonth.from(dataReferencia) : mesFiltro;
+
+        List<Pedido> pedidosDoPeriodo = pedidos.stream()
+                .filter(pedido -> pedido.getCriadoEm() != null)
+                .filter(pedido -> pertenceAoPeriodo(pedido, filtroMensal, dataReferencia, mesReferencia))
+                .filter(this::pedidoValidoParaFaturamento)
+                .sorted(Comparator.comparing(Pedido::getCriadoEm))
+                .toList();
+
+        BigDecimal totalRecebido = pedidosDoPeriodo.stream()
+                .map(Pedido::getPagamento)
+                .filter(pagamento -> pagamento != null && pagamento.getValor() != null)
+                .map(Pagamento::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalPendente = pedidosDoPeriodo.stream()
+                .filter(pedido -> pedido.getPagamento() == null)
+                .map(Pedido::getTotal)
+                .filter(total -> total != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, BigDecimal> totaisPorForma = new LinkedHashMap<>();
+        for (FormaPagamento forma : FormaPagamento.values()) {
+            BigDecimal totalForma = pedidosDoPeriodo.stream()
+                    .map(Pedido::getPagamento)
+                    .filter(pagamento -> pagamento != null && pagamento.getFormaPagamento() == forma)
+                    .map(Pagamento::getValor)
+                    .filter(valor -> valor != null)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            totaisPorForma.put(forma.name(), totalForma);
+        }
+
+        return new ExtratoFinanceiro(
+                gerarResumo(tipoPeriodo, dataFiltro, mesFiltro),
+                pedidosDoPeriodo,
+                totalRecebido,
+                totalPendente,
+                totaisPorForma
+        );
+    }
+
     private boolean pertenceAoPeriodo(Pedido pedido, boolean filtroMensal, LocalDate dataReferencia, YearMonth mesReferencia) {
         if (filtroMensal) {
             return YearMonth.from(pedido.getCriadoEm()).equals(mesReferencia);
@@ -114,5 +162,14 @@ public class DashboardService {
     }
 
     public record ProdutoMaisVendido(String nome, Integer quantidade) {
+    }
+
+    public record ExtratoFinanceiro(
+            DashboardResumo resumo,
+            List<Pedido> pedidos,
+            BigDecimal totalRecebido,
+            BigDecimal totalPendente,
+            Map<String, BigDecimal> totaisPorForma
+    ) {
     }
 }

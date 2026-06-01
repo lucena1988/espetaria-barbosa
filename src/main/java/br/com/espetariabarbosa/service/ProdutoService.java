@@ -25,11 +25,26 @@ public class ProdutoService {
         if (produto.getAtivo() == null) {
             produto.setAtivo(true);
         }
+        if (produto.getQuantidadeEstoque() == null) {
+            produto.setQuantidadeEstoque(0);
+        }
+        if (produto.getEstoqueMinimo() == null) {
+            produto.setEstoqueMinimo(5);
+        }
         return produtoRepository.save(produto);
     }
 
     public Produto buscarPorId(Long id) {
         return produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Produto nao encontrado"));
+    }
+
+    public void baixarEstoque(Produto produto, Integer quantidade) {
+        if (!produto.possuiEstoque(quantidade)) {
+            throw new IllegalArgumentException("Estoque insuficiente para " + produto.getNome());
+        }
+
+        produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - quantidade);
+        produtoRepository.save(produto);
     }
 }

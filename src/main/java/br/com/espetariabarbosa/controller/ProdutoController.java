@@ -26,4 +26,12 @@ public class ProdutoController {
         produtoService.salvar(produto);
         return "redirect:/produtos";
     }
+
+    @PostMapping("/{id}/estoque")
+    public String ajustarEstoque(@PathVariable Long id, @RequestParam Integer quantidadeEstoque) {
+        Produto produto = produtoService.buscarPorId(id);
+        produto.setQuantidadeEstoque(quantidadeEstoque);
+        produtoService.salvar(produto);
+        return "redirect:/produtos";
+    }
 }

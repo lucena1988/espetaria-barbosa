@@ -18,6 +18,8 @@
         Pedido enviado para a cozinha.
     </div>
 
+    <div class="error-message" th:if="${erro}" th:text="${erro}"></div>
+
     <form class="public-order card" method="post" th:action="@{/cardapio/mesa/{id}/pedidos(id=${mesa.id})}">
         <input name="nomeCliente" placeholder="Seu nome" required>
 
@@ -26,11 +28,12 @@
             <div class="item-row">
                 <select name="produtoIds" required>
                     <option value="">Selecione o produto</option>
-                    <option th:each="produto : ${produtos}"
-                            th:value="${produto.id}"
-                            th:text="${produto.nome + ' - R$ ' + produto.preco}">
-                    </option>
-                </select>
+                        <option th:each="produto : ${produtos}"
+                                th:value="${produto.id}"
+                                th:disabled="${produto.esgotado()}"
+                                th:text="${produto.nome + ' - R$ ' + produto.preco + ' - Estoque: ' + produto.quantidadeEstoque}">
+                        </option>
+                    </select>
 
                 <input name="quantidades" type="number" min="1" value="1" required>
                 <button class="btn-secondary remover-item" type="button">Remover</button>

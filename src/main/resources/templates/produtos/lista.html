@@ -7,7 +7,7 @@
 </head>
 <body>
 <div class="navbar">
-    <strong>🍢 Espetaria Barbosa</strong>
+    <strong>Espetaria Barbosa</strong>
     <a href="/dashboard">Dashboard</a>
     <a href="/pedidos">Pedidos</a>
     <a href="/pedidos/novo">Novo Pedido</a>
@@ -25,15 +25,32 @@
         <form method="post" action="/produtos">
             <input name="nome" placeholder="Nome do produto" required>
             <input name="categoria" placeholder="Categoria. Ex: Espetos, Bebidas" required>
-            <input name="preco" type="number" step="0.01" placeholder="Preço" required>
+            <input name="preco" type="number" step="0.01" placeholder="Preco" required>
+            <input name="quantidadeEstoque" type="number" min="0" value="0" placeholder="Quantidade em estoque" required>
+            <input name="estoqueMinimo" type="number" min="0" value="5" placeholder="Estoque minimo" required>
             <button type="submit">Salvar Produto</button>
         </form>
     </div>
 
-    <div class="card" th:each="produto : ${produtos}">
+    <div class="card produto-card"
+         th:each="produto : ${produtos}"
+         th:classappend="${produto.esgotado()} ? ' estoque-esgotado' : (${produto.estoqueBaixo()} ? ' estoque-baixo' : ' estoque-ok')">
         <h3 th:text="${produto.nome}"></h3>
         <p>Categoria: <span th:text="${produto.categoria}"></span></p>
-        <p>Preço: R$ <span th:text="${produto.preco}"></span></p>
+        <p>Preco: R$ <span th:text="${produto.preco}"></span></p>
+        <p>
+            Estoque:
+            <strong th:text="${produto.quantidadeEstoque}"></strong>
+            <span th:if="${produto.esgotado()}" class="stock-badge danger">Esgotado</span>
+            <span th:if="${produto.estoqueBaixo()}" class="stock-badge warning">Estoque baixo</span>
+            <span th:if="${!produto.esgotado() and !produto.estoqueBaixo()}" class="stock-badge ok">OK</span>
+        </p>
+        <p>Estoque minimo: <span th:text="${produto.estoqueMinimo}"></span></p>
+
+        <form class="stock-form" method="post" th:action="@{/produtos/{id}/estoque(id=${produto.id})}">
+            <input name="quantidadeEstoque" type="number" min="0" th:value="${produto.quantidadeEstoque}" required>
+            <button class="btn-secondary" type="submit">Atualizar estoque</button>
+        </form>
     </div>
 </div>
 </body>

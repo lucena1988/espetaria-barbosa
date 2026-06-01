@@ -20,6 +20,8 @@
 <div class="container">
     <h1>Novo Pedido</h1>
 
+    <div class="error-message" th:if="${erro}" th:text="${erro}"></div>
+
     <div class="card">
         <form method="post" action="/pedidos">
             <select id="cliente-select" name="clienteId">
@@ -60,7 +62,8 @@
                         <option value="">Selecione o produto</option>
                         <option th:each="produto : ${produtos}"
                                 th:value="${produto.id}"
-                                th:text="${produto.nome + ' - R$ ' + produto.preco}">
+                                th:disabled="${produto.esgotado()}"
+                                th:text="${produto.nome + ' - R$ ' + produto.preco + ' - Estoque: ' + produto.quantidadeEstoque}">
                         </option>
                     </select>
 

@@ -1,7 +1,12 @@
 package br.com.espetariabarbosa.controller;
 
 import br.com.espetariabarbosa.service.DashboardService;
+import br.com.espetariabarbosa.service.ExtratoPdfService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +20,7 @@ import java.time.YearMonth;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final ExtratoPdfService extratoPdfService;
 
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(required = false, defaultValue = "dia") String periodo,
@@ -26,6 +32,30 @@ public class DashboardController {
 
         model.addAttribute("resumo", dashboardService.gerarResumo(periodo, dataFiltro, mesFiltro));
         return "dashboard/index";
+    }
+
+    @GetMapping("/dashboard/extrato.pdf")
+    public ResponseEntity<byte[]> extratoPdf(@RequestParam(required = false, defaultValue = "dia") String periodo,
+                                             @RequestParam(required = false) String data,
+                                             @RequestParam(required = false) String mes) {
+        LocalDate dataFiltro = parseData(data);
+        YearMonth mesFiltro = parseMes(mes);
+        var extrato = dashboardService.gerarExtrato(periodo, dataFiltro, mesFiltro);
+        byte[] pdf = extratoPdfService.gerar(extrato);
+
+        String nomeArquivo = "extrato-financeiro-" + extrato.resumo().tipoPeriodo() + "-"
+                + ("mes".equals(extrato.resumo().tipoPeriodo())
+                ? extrato.resumo().mesFiltro()
+                : extrato.resumo().dataFiltro())
+                + ".pdf";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename(nomeArquivo)
+                        .build()
+                        .toString())
+                .body(pdf);
     }
 
     private LocalDate parseData(String data) {

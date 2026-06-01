@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -24,11 +25,13 @@ public class CardapioController {
     @GetMapping("/mesa/{mesaId}")
     public String cardapioMesa(@PathVariable Long mesaId,
                                @RequestParam(required = false) Boolean sucesso,
+                               @RequestParam(required = false) String erro,
                                Model model) {
         Mesa mesa = mesaService.buscarPorId(mesaId);
         model.addAttribute("mesa", mesa);
         model.addAttribute("produtos", produtoService.listarAtivos());
         model.addAttribute("sucesso", Boolean.TRUE.equals(sucesso));
+        model.addAttribute("erro", erro);
         return "cardapio/mesa";
     }
 
@@ -36,9 +39,15 @@ public class CardapioController {
     public String criarPedidoMesa(@PathVariable Long mesaId,
                                   @RequestParam String nomeCliente,
                                   @RequestParam List<Long> produtoIds,
-                                  @RequestParam List<Integer> quantidades) {
+                                  @RequestParam List<Integer> quantidades,
+                                  RedirectAttributes redirectAttributes) {
         Mesa mesa = mesaService.buscarPorId(mesaId);
-        pedidoService.criarPedido(nomeCliente, mesa.getNumero(), TipoAtendimento.MESA, produtoIds, quantidades);
+        try {
+            pedidoService.criarPedido(nomeCliente, mesa.getNumero(), TipoAtendimento.MESA, produtoIds, quantidades);
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addAttribute("erro", exception.getMessage());
+            return "redirect:/cardapio/mesa/" + mesaId;
+        }
         return "redirect:/cardapio/mesa/" + mesaId + "?sucesso=true";
     }
 }

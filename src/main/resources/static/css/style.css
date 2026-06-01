@@ -140,6 +140,46 @@ button, .btn {
     margin-top: 0;
 }
 
+.produto-card {
+    border-left: 6px solid #16a34a;
+}
+
+.produto-card.estoque-baixo {
+    border-left-color: #f59e0b;
+}
+
+.produto-card.estoque-esgotado {
+    border-left-color: #dc2626;
+}
+
+.stock-badge {
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 8px;
+    padding: 5px 9px;
+}
+
+.stock-badge.ok {
+    background: #166534;
+}
+
+.stock-badge.warning {
+    background: #f59e0b;
+    color: #111827;
+}
+
+.stock-badge.danger {
+    background: #991b1b;
+}
+
+.stock-form {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 160px auto;
+}
+
 .qr-card {
     align-items: center;
     display: grid;
@@ -192,6 +232,15 @@ button, .btn {
 
 .success-message {
     background: #166534;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    padding: 14px;
+    text-align: center;
+}
+
+.error-message {
+    background: #991b1b;
     border-radius: 8px;
     font-weight: bold;
     margin-bottom: 16px;
@@ -320,7 +369,7 @@ button, .btn {
     border-radius: 10px;
     display: grid;
     gap: 12px;
-    grid-template-columns: 180px 220px auto auto;
+    grid-template-columns: 180px 220px auto auto auto;
     margin-bottom: 16px;
     padding: 14px;
 }

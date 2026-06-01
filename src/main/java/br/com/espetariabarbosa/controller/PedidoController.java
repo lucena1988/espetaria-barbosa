@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -36,11 +37,12 @@ public class PedidoController {
     }
 
     @GetMapping("/novo")
-    public String novo(Model model) {
+    public String novo(@RequestParam(required = false) String erro, Model model) {
         model.addAttribute("produtos", produtoService.listarAtivos());
         model.addAttribute("mesas", mesaService.listarDisponiveisParaPedido());
         model.addAttribute("clientes", clienteService.listarAtivos());
         model.addAttribute("tiposAtendimento", TipoAtendimento.values());
+        model.addAttribute("erro", erro);
         return "pedidos/novo";
     }
 
@@ -50,8 +52,14 @@ public class PedidoController {
                         @RequestParam String mesa,
                         @RequestParam TipoAtendimento tipoAtendimento,
                         @RequestParam List<Long> produtoIds,
-                        @RequestParam List<Integer> quantidades) {
-        pedidoService.criarPedido(clienteId, nomeCliente, mesa, tipoAtendimento, produtoIds, quantidades);
+                        @RequestParam List<Integer> quantidades,
+                        RedirectAttributes redirectAttributes) {
+        try {
+            pedidoService.criarPedido(clienteId, nomeCliente, mesa, tipoAtendimento, produtoIds, quantidades);
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addAttribute("erro", exception.getMessage());
+            return "redirect:/pedidos/novo";
+        }
         return "redirect:/pedidos";
     }
 

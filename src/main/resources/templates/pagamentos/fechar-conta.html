@@ -2,12 +2,12 @@
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Pedidos - Espetaria Barbosa</title>
+    <title>Fechar Conta - Espetaria Barbosa</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <div class="navbar">
-    <strong>🍢 Espetaria Barbosa</strong>
+    <strong>Espetaria Barbosa</strong>
     <a href="/dashboard">Dashboard</a>
     <a href="/pedidos">Pedidos</a>
     <a href="/pedidos/novo">Novo Pedido</a>
@@ -20,21 +20,16 @@
 </div>
 <div class="container">
     <div class="page-header">
-        <h1>Pedidos em aberto</h1>
-        <div class="action-row">
-            <a class="btn" href="/pedidos/novo">Novo Pedido</a>
-            <a class="btn btn-secondary" href="/pedidos/historico">Historico</a>
-        </div>
+        <h1>Fechar Conta</h1>
+        <a class="btn btn-secondary" href="/pedidos">Voltar</a>
     </div>
 
-    <p class="empty-state" th:if="${#lists.isEmpty(pedidos)}">Nenhum pedido em aberto.</p>
-
-    <div class="card" th:each="pedido : ${pedidos}">
+    <div class="card">
         <h2>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h2>
         <p>Atendimento: <span th:text="${pedido.tipoAtendimento}"></span></p>
         <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
         <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
-        <p>Total: R$ <span th:text="${pedido.total}"></span></p>
+        <p>Total: R$ <strong th:text="${pedido.total}"></strong></p>
 
         <ul>
             <li th:each="item : ${pedido.itens}">
@@ -43,19 +38,22 @@
                 - R$ <span th:text="${item.subtotal}"></span>
             </li>
         </ul>
+    </div>
 
-        <form method="post" th:action="@{/pedidos/{id}/status(id=${pedido.id})}">
-            <select name="status">
-                <option value="RECEBIDO">Recebido</option>
-                <option value="EM_PREPARO">Em preparo</option>
-                <option value="PRONTO">Pronto</option>
-                <option value="ENTREGUE">Entregue</option>
-                <option value="CANCELADO">Cancelado</option>
+    <div class="card">
+        <h2>Pagamento</h2>
+        <form method="post" th:action="@{/pagamentos/pedido/{id}(id=${pedido.id})}">
+            <select name="formaPagamento" required>
+                <option value="">Selecione a forma de pagamento</option>
+                <option th:each="forma : ${formasPagamento}"
+                        th:value="${forma}"
+                        th:text="${forma}">
+                </option>
             </select>
-            <button type="submit">Alterar Status</button>
-        </form>
 
-        <a class="btn" th:href="@{/pagamentos/pedido/{id}(id=${pedido.id})}">Fechar conta</a>
+            <input name="valor" type="number" step="0.01" min="0.01" th:value="${pedido.total}" required>
+            <button type="submit">Registrar pagamento e entregar</button>
+        </form>
     </div>
 </div>
 </body>
