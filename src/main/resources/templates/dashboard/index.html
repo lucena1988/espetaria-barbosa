@@ -39,6 +39,7 @@
             <label for="periodo">Periodo</label>
             <select id="periodo" name="periodo">
                 <option value="dia" th:selected="${resumo.tipoPeriodo == 'dia'}">Dia</option>
+                <option value="intervalo" th:selected="${resumo.tipoPeriodo == 'intervalo'}">Intervalo</option>
                 <option value="mes" th:selected="${resumo.tipoPeriodo == 'mes'}">Mes</option>
             </select>
         </div>
@@ -46,6 +47,16 @@
         <div class="filter-field" id="campo-data">
             <label for="data">Data</label>
             <input id="data" name="data" type="date" th:value="${resumo.dataFiltro}">
+        </div>
+
+        <div class="filter-field" id="campo-data-inicio">
+            <label for="dataInicio">Data inicial</label>
+            <input id="dataInicio" name="dataInicio" type="date" th:value="${resumo.dataInicioFiltro}">
+        </div>
+
+        <div class="filter-field" id="campo-data-fim">
+            <label for="dataFim">Data final</label>
+            <input id="dataFim" name="dataFim" type="date" th:value="${resumo.dataFimFiltro}">
         </div>
 
         <div class="filter-field" id="campo-mes">
@@ -120,8 +131,12 @@
     const sensitiveValues = document.querySelectorAll('.sensitive-value');
     const periodo = document.getElementById('periodo');
     const campoData = document.getElementById('campo-data');
+    const campoDataInicio = document.getElementById('campo-data-inicio');
+    const campoDataFim = document.getElementById('campo-data-fim');
     const campoMes = document.getElementById('campo-mes');
     const data = document.getElementById('data');
+    const dataInicio = document.getElementById('dataInicio');
+    const dataFim = document.getElementById('dataFim');
     const mes = document.getElementById('mes');
 
     function aplicarPrivacidade(ocultar) {
@@ -142,9 +157,14 @@
 
     function alternarFiltroPeriodo() {
         const filtroMensal = periodo.value === 'mes';
-        campoData.hidden = filtroMensal;
+        const filtroIntervalo = periodo.value === 'intervalo';
+        campoData.hidden = filtroMensal || filtroIntervalo;
+        campoDataInicio.hidden = !filtroIntervalo;
+        campoDataFim.hidden = !filtroIntervalo;
         campoMes.hidden = !filtroMensal;
-        data.disabled = filtroMensal;
+        data.disabled = filtroMensal || filtroIntervalo;
+        dataInicio.disabled = !filtroIntervalo;
+        dataFim.disabled = !filtroIntervalo;
         mes.disabled = !filtroMensal;
     }
 

@@ -25,27 +25,37 @@ public class DashboardController {
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(required = false, defaultValue = "dia") String periodo,
                             @RequestParam(required = false) String data,
+                            @RequestParam(required = false) String dataInicio,
+                            @RequestParam(required = false) String dataFim,
                             @RequestParam(required = false) String mes,
                             Model model) {
         LocalDate dataFiltro = parseData(data);
+        LocalDate dataInicioFiltro = parseData(dataInicio);
+        LocalDate dataFimFiltro = parseData(dataFim);
         YearMonth mesFiltro = parseMes(mes);
 
-        model.addAttribute("resumo", dashboardService.gerarResumo(periodo, dataFiltro, mesFiltro));
+        model.addAttribute("resumo", dashboardService.gerarResumo(periodo, dataFiltro, dataInicioFiltro, dataFimFiltro, mesFiltro));
         return "dashboard/index";
     }
 
     @GetMapping("/dashboard/extrato.pdf")
     public ResponseEntity<byte[]> extratoPdf(@RequestParam(required = false, defaultValue = "dia") String periodo,
                                              @RequestParam(required = false) String data,
+                                             @RequestParam(required = false) String dataInicio,
+                                             @RequestParam(required = false) String dataFim,
                                              @RequestParam(required = false) String mes) {
         LocalDate dataFiltro = parseData(data);
+        LocalDate dataInicioFiltro = parseData(dataInicio);
+        LocalDate dataFimFiltro = parseData(dataFim);
         YearMonth mesFiltro = parseMes(mes);
-        var extrato = dashboardService.gerarExtrato(periodo, dataFiltro, mesFiltro);
+        var extrato = dashboardService.gerarExtrato(periodo, dataFiltro, dataInicioFiltro, dataFimFiltro, mesFiltro);
         byte[] pdf = extratoPdfService.gerar(extrato);
 
         String nomeArquivo = "extrato-financeiro-" + extrato.resumo().tipoPeriodo() + "-"
                 + ("mes".equals(extrato.resumo().tipoPeriodo())
                 ? extrato.resumo().mesFiltro()
+                : "intervalo".equals(extrato.resumo().tipoPeriodo())
+                ? extrato.resumo().dataInicioFiltro() + "-a-" + extrato.resumo().dataFimFiltro()
                 : extrato.resumo().dataFiltro())
                 + ".pdf";
 

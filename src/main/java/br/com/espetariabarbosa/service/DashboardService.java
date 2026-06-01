@@ -26,15 +26,27 @@ public class DashboardService {
 
     private final PedidoRepository pedidoRepository;
 
-    public DashboardResumo gerarResumo(String tipoPeriodo, LocalDate dataFiltro, YearMonth mesFiltro) {
+    public DashboardResumo gerarResumo(String tipoPeriodo, LocalDate dataFiltro, LocalDate dataInicioFiltro,
+                                       LocalDate dataFimFiltro, YearMonth mesFiltro) {
         List<Pedido> pedidos = pedidoRepository.findAll();
         boolean filtroMensal = "mes".equalsIgnoreCase(tipoPeriodo);
+        boolean filtroIntervalo = "intervalo".equalsIgnoreCase(tipoPeriodo);
         LocalDate dataReferencia = dataFiltro == null ? LocalDate.now() : dataFiltro;
+        LocalDate dataInicioReferencia = dataInicioFiltro == null ? dataReferencia : dataInicioFiltro;
+        LocalDate dataFimReferencia = dataFimFiltro == null ? dataInicioReferencia : dataFimFiltro;
+        if (dataFimReferencia.isBefore(dataInicioReferencia)) {
+            LocalDate dataTemporaria = dataInicioReferencia;
+            dataInicioReferencia = dataFimReferencia;
+            dataFimReferencia = dataTemporaria;
+        }
+        LocalDate dataInicioPeriodo = dataInicioReferencia;
+        LocalDate dataFimPeriodo = dataFimReferencia;
         YearMonth mesReferencia = mesFiltro == null ? YearMonth.from(dataReferencia) : mesFiltro;
 
         List<Pedido> pedidosDoPeriodo = pedidos.stream()
                 .filter(pedido -> pedido.getCriadoEm() != null)
-                .filter(pedido -> pertenceAoPeriodo(pedido, filtroMensal, dataReferencia, mesReferencia))
+                .filter(pedido -> pertenceAoPeriodo(pedido, filtroMensal, filtroIntervalo, dataReferencia,
+                        dataInicioPeriodo, dataFimPeriodo, mesReferencia))
                 .filter(this::pedidoValidoParaFaturamento)
                 .toList();
 
@@ -68,11 +80,16 @@ public class DashboardService {
                 .toList();
 
         return new DashboardResumo(
-                filtroMensal ? "mes" : "dia",
+                filtroMensal ? "mes" : (filtroIntervalo ? "intervalo" : "dia"),
                 dataReferencia.toString(),
+                dataInicioPeriodo.toString(),
+                dataFimPeriodo.toString(),
                 mesReferencia.toString(),
                 filtroMensal
                         ? mesReferencia.format(DateTimeFormatter.ofPattern("MM/yyyy"))
+                        : filtroIntervalo
+                        ? dataInicioPeriodo.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                        + " a " + dataFimPeriodo.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                         : dataReferencia.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                 vendasDoPeriodo,
                 pedidosDoPeriodo.size(),
@@ -83,15 +100,27 @@ public class DashboardService {
         );
     }
 
-    public ExtratoFinanceiro gerarExtrato(String tipoPeriodo, LocalDate dataFiltro, YearMonth mesFiltro) {
+    public ExtratoFinanceiro gerarExtrato(String tipoPeriodo, LocalDate dataFiltro, LocalDate dataInicioFiltro,
+                                          LocalDate dataFimFiltro, YearMonth mesFiltro) {
         List<Pedido> pedidos = pedidoRepository.findAll();
         boolean filtroMensal = "mes".equalsIgnoreCase(tipoPeriodo);
+        boolean filtroIntervalo = "intervalo".equalsIgnoreCase(tipoPeriodo);
         LocalDate dataReferencia = dataFiltro == null ? LocalDate.now() : dataFiltro;
+        LocalDate dataInicioReferencia = dataInicioFiltro == null ? dataReferencia : dataInicioFiltro;
+        LocalDate dataFimReferencia = dataFimFiltro == null ? dataInicioReferencia : dataFimFiltro;
+        if (dataFimReferencia.isBefore(dataInicioReferencia)) {
+            LocalDate dataTemporaria = dataInicioReferencia;
+            dataInicioReferencia = dataFimReferencia;
+            dataFimReferencia = dataTemporaria;
+        }
+        LocalDate dataInicioPeriodo = dataInicioReferencia;
+        LocalDate dataFimPeriodo = dataFimReferencia;
         YearMonth mesReferencia = mesFiltro == null ? YearMonth.from(dataReferencia) : mesFiltro;
 
         List<Pedido> pedidosDoPeriodo = pedidos.stream()
                 .filter(pedido -> pedido.getCriadoEm() != null)
-                .filter(pedido -> pertenceAoPeriodo(pedido, filtroMensal, dataReferencia, mesReferencia))
+                .filter(pedido -> pertenceAoPeriodo(pedido, filtroMensal, filtroIntervalo, dataReferencia,
+                        dataInicioPeriodo, dataFimPeriodo, mesReferencia))
                 .filter(this::pedidoValidoParaFaturamento)
                 .sorted(Comparator.comparing(Pedido::getCriadoEm))
                 .toList();
@@ -120,7 +149,7 @@ public class DashboardService {
         }
 
         return new ExtratoFinanceiro(
-                gerarResumo(tipoPeriodo, dataFiltro, mesFiltro),
+                gerarResumo(tipoPeriodo, dataFiltro, dataInicioFiltro, dataFimFiltro, mesFiltro),
                 pedidosDoPeriodo,
                 totalRecebido,
                 totalPendente,
@@ -128,12 +157,19 @@ public class DashboardService {
         );
     }
 
-    private boolean pertenceAoPeriodo(Pedido pedido, boolean filtroMensal, LocalDate dataReferencia, YearMonth mesReferencia) {
+    private boolean pertenceAoPeriodo(Pedido pedido, boolean filtroMensal, boolean filtroIntervalo,
+                                      LocalDate dataReferencia, LocalDate dataInicioReferencia,
+                                      LocalDate dataFimReferencia, YearMonth mesReferencia) {
         if (filtroMensal) {
             return YearMonth.from(pedido.getCriadoEm()).equals(mesReferencia);
         }
 
-        return pedido.getCriadoEm().toLocalDate().isEqual(dataReferencia);
+        LocalDate dataPedido = pedido.getCriadoEm().toLocalDate();
+        if (filtroIntervalo) {
+            return !dataPedido.isBefore(dataInicioReferencia) && !dataPedido.isAfter(dataFimReferencia);
+        }
+
+        return dataPedido.isEqual(dataReferencia);
     }
 
     private BigDecimal somarTotal(List<Pedido> pedidos) {
@@ -150,6 +186,8 @@ public class DashboardService {
     public record DashboardResumo(
             String tipoPeriodo,
             String dataFiltro,
+            String dataInicioFiltro,
+            String dataFimFiltro,
             String mesFiltro,
             String periodoLabel,
             BigDecimal vendasDoPeriodo,
