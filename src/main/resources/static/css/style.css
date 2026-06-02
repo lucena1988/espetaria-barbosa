@@ -221,6 +221,156 @@ button, .btn {
     grid-template-columns: 160px auto;
 }
 
+.transfer-form {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(180px, 1fr) auto;
+    margin: 10px 0;
+}
+
+.merge-order-form {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(220px, 1fr) auto;
+    margin: 10px 0;
+}
+
+.merge-order-form select,
+.transfer-form select {
+    margin: 0;
+}
+
+.add-item-form {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(220px, 1fr) 100px auto;
+    margin: 12px 0;
+}
+
+.add-item-form input,
+.add-item-form select {
+    margin: 0;
+}
+
+.order-items {
+    display: grid;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+}
+
+.order-item-row {
+    align-items: center;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr auto;
+    padding: 10px;
+}
+
+.order-item-row form {
+    margin: 0;
+}
+
+.order-item-row button {
+    padding: 8px 12px;
+}
+
+.payment-summary {
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    display: grid;
+    gap: 8px;
+    margin: 14px 0;
+    padding: 14px;
+}
+
+.payment-split-header {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin: 14px 0 8px;
+}
+
+.payment-split-header h3 {
+    margin: 0;
+}
+
+.payment-rows {
+    display: grid;
+    gap: 8px;
+}
+
+.payment-row {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(180px, 1fr) 140px auto;
+}
+
+.payment-row input,
+.payment-row select {
+    margin: 0;
+}
+
+.payment-summary div,
+.payment-details {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.payment-summary span,
+.payment-details span {
+    color: #d1d5db;
+}
+
+.payment-summary-total {
+    border-top: 1px solid #374151;
+    margin-top: 6px;
+    padding-top: 10px;
+}
+
+.payment-summary-total strong {
+    color: #facc15;
+    font-size: 22px;
+}
+
+.payment-summary-balance strong {
+    color: #facc15;
+}
+
+.payment-details {
+    background: #111827;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: 10px 0;
+    padding: 10px;
+}
+
+.payment-installments {
+    display: grid;
+    gap: 6px;
+    list-style: none;
+    margin: 10px 0;
+    padding: 0;
+}
+
+.payment-installments li {
+    align-items: center;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+}
+
 .qr-card {
     align-items: center;
     display: grid;
@@ -584,6 +734,11 @@ button, .btn {
     .dashboard-metrics,
     .dashboard-content,
     .dashboard-filter,
+    .add-item-form,
+    .merge-order-form,
+    .order-item-row,
+    .payment-row,
+    .transfer-form,
     .item-row {
         grid-template-columns: 1fr;
     }

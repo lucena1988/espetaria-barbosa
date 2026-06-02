@@ -19,6 +19,8 @@ public class ItemPedido {
 
     private String nomeProduto;
 
+    private Long produtoId;
+
     private Integer quantidade;
 
     private BigDecimal precoUnitario;

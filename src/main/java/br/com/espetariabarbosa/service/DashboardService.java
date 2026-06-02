@@ -50,7 +50,7 @@ public class DashboardService {
                 .filter(this::pedidoValidoParaFaturamento)
                 .toList();
 
-        BigDecimal vendasDoPeriodo = somarTotal(pedidosDoPeriodo);
+        BigDecimal vendasDoPeriodo = somarValorFaturamento(pedidosDoPeriodo);
         long pedidosAbertos = pedidos.stream()
                 .filter(pedido -> List.of(StatusPedido.RECEBIDO, StatusPedido.EM_PREPARO, StatusPedido.PRONTO)
                         .contains(pedido.getStatus()))
@@ -60,7 +60,7 @@ public class DashboardService {
                 ? BigDecimal.ZERO
                 : vendasDoPeriodo.divide(BigDecimal.valueOf(pedidosDoPeriodo.size()), 2, RoundingMode.HALF_UP);
 
-        BigDecimal faturamentoMensal = somarTotal(pedidos.stream()
+        BigDecimal faturamentoMensal = somarValorFaturamento(pedidos.stream()
                 .filter(pedido -> pedido.getCriadoEm() != null)
                 .filter(pedido -> YearMonth.from(pedido.getCriadoEm()).equals(mesReferencia))
                 .filter(this::pedidoValidoParaFaturamento)
@@ -141,9 +141,8 @@ public class DashboardService {
         for (FormaPagamento forma : FormaPagamento.values()) {
             BigDecimal totalForma = pedidosDoPeriodo.stream()
                     .map(Pedido::getPagamento)
-                    .filter(pagamento -> pagamento != null && pagamento.getFormaPagamento() == forma)
-                    .map(Pagamento::getValor)
-                    .filter(valor -> valor != null)
+                    .filter(pagamento -> pagamento != null)
+                    .map(pagamento -> valorPorForma(pagamento, forma))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             totaisPorForma.put(forma.name(), totalForma);
         }
@@ -172,11 +171,34 @@ public class DashboardService {
         return dataPedido.isEqual(dataReferencia);
     }
 
-    private BigDecimal somarTotal(List<Pedido> pedidos) {
+    private BigDecimal somarValorFaturamento(List<Pedido> pedidos) {
         return pedidos.stream()
-                .map(Pedido::getTotal)
+                .map(this::valorFaturamento)
                 .filter(total -> total != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal valorFaturamento(Pedido pedido) {
+        if (pedido.getPagamento() != null && pedido.getPagamento().getValor() != null) {
+            return pedido.getPagamento().getValor();
+        }
+
+        return pedido.getTotal();
+    }
+
+    private BigDecimal valorPorForma(Pagamento pagamento, FormaPagamento forma) {
+        if (pagamento.getParcelas() != null && !pagamento.getParcelas().isEmpty()) {
+            return pagamento.getParcelas().stream()
+                    .filter(parcela -> parcela.getFormaPagamento() == forma)
+                    .map(parcela -> parcela.getValor() == null ? BigDecimal.ZERO : parcela.getValor())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        if (pagamento.getFormaPagamento() != forma) {
+            return BigDecimal.ZERO;
+        }
+
+        return pagamento.getValor() == null ? BigDecimal.ZERO : pagamento.getValor();
     }
 
     private boolean pedidoValidoParaFaturamento(Pedido pedido) {

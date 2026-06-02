@@ -34,13 +34,15 @@
         <p>Atendimento: <span th:text="${pedido.tipoAtendimento}"></span></p>
         <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
         <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
-        <p>Total: R$ <strong th:text="${pedido.total}"></strong></p>
+        <p>Total dos itens: R$ <strong id="total-pedido" th:data-total="${pedido.total}" th:text="${pedido.total}"></strong></p>
 
-        <ul>
-            <li th:each="item : ${pedido.itens}">
-                <span th:text="${item.quantidade}"></span>x
-                <span th:text="${item.nomeProduto}"></span>
-                - R$ <span th:text="${item.subtotal}"></span>
+        <ul class="order-items">
+            <li class="order-item-row" th:each="item : ${pedido.itens}">
+                <span>
+                    <span th:text="${item.quantidade}"></span>x
+                    <span th:text="${item.nomeProduto}"></span>
+                </span>
+                <strong>R$ <span th:text="${item.subtotal}"></span></strong>
             </li>
         </ul>
     </div>
@@ -48,18 +50,129 @@
     <div class="card">
         <h2>Pagamento</h2>
         <form method="post" th:action="@{/pagamentos/pedido/{id}(id=${pedido.id})}">
-            <select name="formaPagamento" required>
-                <option value="">Selecione a forma de pagamento</option>
-                <option th:each="forma : ${formasPagamento}"
-                        th:value="${forma}"
-                        th:text="${forma}">
-                </option>
-            </select>
+            <label for="desconto">Desconto</label>
+            <input id="desconto" name="desconto" type="number" step="0.01" min="0" value="0">
 
-            <input name="valor" type="number" step="0.01" min="0.01" th:value="${pedido.total}" required>
-            <button type="submit">Registrar pagamento e entregar</button>
+            <label for="taxaServico">Taxa de servico</label>
+            <input id="taxaServico" name="taxaServico" type="number" step="0.01" min="0" value="0">
+
+            <div class="payment-split-header">
+                <h3>Formas de pagamento</h3>
+                <button class="btn-secondary" id="adicionar-pagamento" type="button">Adicionar forma</button>
+            </div>
+
+            <div id="payment-rows" class="payment-rows">
+                <div class="payment-row">
+                    <select name="formasPagamento" required>
+                        <option value="">Forma de pagamento</option>
+                        <option th:each="forma : ${formasPagamento}"
+                                th:value="${forma}"
+                                th:text="${forma}">
+                        </option>
+                    </select>
+                    <input name="valoresPagamento" class="payment-value" type="number" step="0.01" min="0.01" required>
+                    <button class="btn-secondary remove-payment" type="button">Remover</button>
+                </div>
+            </div>
+
+            <div class="payment-summary">
+                <div>
+                    <span>Total dos itens</span>
+                    <strong id="resumo-total-itens">R$ 0,00</strong>
+                </div>
+                <div>
+                    <span>Desconto</span>
+                    <strong id="resumo-desconto">- R$ 0,00</strong>
+                </div>
+                <div>
+                    <span>Taxa de servico</span>
+                    <strong id="resumo-taxa">+ R$ 0,00</strong>
+                </div>
+                <div class="payment-summary-total">
+                    <span>Total a pagar</span>
+                    <strong id="resumo-total-pagar">R$ 0,00</strong>
+                </div>
+                <div>
+                    <span>Pagamentos informados</span>
+                    <strong id="resumo-total-informado">R$ 0,00</strong>
+                </div>
+                <div class="payment-summary-balance">
+                    <span>Falta fechar</span>
+                    <strong id="resumo-restante">R$ 0,00</strong>
+                </div>
+            </div>
+
+            <button id="registrar-pagamento" type="submit">Registrar pagamento e entregar</button>
         </form>
     </div>
 </div>
+<script>
+    const totalPedidoEl = document.getElementById('total-pedido');
+    const descontoEl = document.getElementById('desconto');
+    const taxaServicoEl = document.getElementById('taxaServico');
+    const paymentRowsEl = document.getElementById('payment-rows');
+    const adicionarPagamentoBtn = document.getElementById('adicionar-pagamento');
+    const registrarPagamentoBtn = document.getElementById('registrar-pagamento');
+    const resumoTotalItens = document.getElementById('resumo-total-itens');
+    const resumoDesconto = document.getElementById('resumo-desconto');
+    const resumoTaxa = document.getElementById('resumo-taxa');
+    const resumoTotalPagar = document.getElementById('resumo-total-pagar');
+    const resumoTotalInformado = document.getElementById('resumo-total-informado');
+    const resumoRestante = document.getElementById('resumo-restante');
+    const totalPedido = parseFloat((totalPedidoEl?.dataset.total || '0').replace(',', '.')) || 0;
+    const moeda = new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'});
+
+    function valorCampo(input) {
+        return Math.max(0, parseFloat((input.value || '0').replace(',', '.')) || 0);
+    }
+
+    function atualizarResumoPagamento() {
+        const desconto = valorCampo(descontoEl);
+        const taxa = valorCampo(taxaServicoEl);
+        const totalPagar = Math.max(0, totalPedido - desconto + taxa);
+        const totalInformado = Array.from(document.querySelectorAll('.payment-value'))
+            .map(valorCampo)
+            .reduce((total, valor) => total + valor, 0);
+        const restante = totalPagar - totalInformado;
+
+        resumoTotalItens.textContent = moeda.format(totalPedido);
+        resumoDesconto.textContent = '- ' + moeda.format(desconto);
+        resumoTaxa.textContent = '+ ' + moeda.format(taxa);
+        resumoTotalPagar.textContent = moeda.format(totalPagar);
+        resumoTotalInformado.textContent = moeda.format(totalInformado);
+        resumoRestante.textContent = moeda.format(restante);
+        registrarPagamentoBtn.disabled = Math.abs(restante) > 0.009 || totalPagar <= 0;
+    }
+
+    function configurarLinhaPagamento(row) {
+        row.querySelectorAll('input, select').forEach((input) => {
+            input.addEventListener('input', atualizarResumoPagamento);
+            input.addEventListener('change', atualizarResumoPagamento);
+        });
+        row.querySelector('.remove-payment').addEventListener('click', () => {
+            if (paymentRowsEl.children.length === 1) {
+                row.querySelector('select').value = '';
+                row.querySelector('.payment-value').value = '';
+            } else {
+                row.remove();
+            }
+            atualizarResumoPagamento();
+        });
+    }
+
+    adicionarPagamentoBtn.addEventListener('click', () => {
+        const novaLinha = paymentRowsEl.firstElementChild.cloneNode(true);
+        novaLinha.querySelector('select').value = '';
+        novaLinha.querySelector('.payment-value').value = '';
+        paymentRowsEl.appendChild(novaLinha);
+        configurarLinhaPagamento(novaLinha);
+        atualizarResumoPagamento();
+    });
+
+    descontoEl.addEventListener('input', atualizarResumoPagamento);
+    taxaServicoEl.addEventListener('input', atualizarResumoPagamento);
+    document.querySelectorAll('.payment-row').forEach(configurarLinhaPagamento);
+    atualizarResumoPagamento();
+</script>
 </body>
 </html>

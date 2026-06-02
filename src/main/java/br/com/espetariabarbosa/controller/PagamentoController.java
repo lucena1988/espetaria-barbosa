@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,9 +32,11 @@ public class PagamentoController {
 
     @PostMapping("/pedido/{pedidoId}")
     public String registrar(@PathVariable Long pedidoId,
-                            @RequestParam FormaPagamento formaPagamento,
-                            @RequestParam(required = false) BigDecimal valor) {
-        pagamentoService.registrarPagamento(pedidoId, formaPagamento, valor);
+                            @RequestParam List<FormaPagamento> formasPagamento,
+                            @RequestParam List<BigDecimal> valoresPagamento,
+                            @RequestParam(required = false) BigDecimal desconto,
+                            @RequestParam(required = false) BigDecimal taxaServico) {
+        pagamentoService.registrarPagamento(pedidoId, formasPagamento, valoresPagamento, desconto, taxaServico);
         return "redirect:/pedidos/historico";
     }
 }

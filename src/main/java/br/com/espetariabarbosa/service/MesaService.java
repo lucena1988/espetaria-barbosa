@@ -38,4 +38,16 @@ public class MesaService {
         mesa.setStatus(status);
         mesaRepository.save(mesa);
     }
+
+    public void atualizarStatusPorNumeroSeExistir(String numero, StatusMesa status) {
+        if (numero == null || numero.isBlank()) {
+            return;
+        }
+
+        mesaRepository.findByNumeroAndAtivaTrue(numero)
+                .ifPresent(mesa -> {
+                    mesa.setStatus(status);
+                    mesaRepository.save(mesa);
+                });
+    }
 }

@@ -50,4 +50,25 @@ public class ProdutoService {
         produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - quantidade);
         produtoRepository.save(produto);
     }
+
+    public void reporEstoque(Long produtoId, String nomeProduto, Integer quantidade) {
+        if (quantidade == null || quantidade <= 0) {
+            return;
+        }
+
+        Produto produto = null;
+        if (produtoId != null) {
+            produto = buscarPorId(produtoId);
+        } else if (nomeProduto != null && !nomeProduto.isBlank()) {
+            produto = produtoRepository.findFirstByNome(nomeProduto).orElse(null);
+        }
+
+        if (produto == null) {
+            return;
+        }
+
+        int estoqueAtual = produto.getQuantidadeEstoque() == null ? 0 : produto.getQuantidadeEstoque();
+        produto.setQuantidadeEstoque(estoqueAtual + quantidade);
+        produtoRepository.save(produto);
+    }
 }

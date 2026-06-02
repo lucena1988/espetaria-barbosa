@@ -4,7 +4,9 @@ import br.com.espetariabarbosa.entity.Funcionario;
 import br.com.espetariabarbosa.enums.PerfilFuncionario;
 import br.com.espetariabarbosa.repository.FuncionarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password
+
+        .PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

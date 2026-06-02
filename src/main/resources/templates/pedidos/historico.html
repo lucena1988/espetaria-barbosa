@@ -33,21 +33,39 @@
 
     <div class="card" th:each="pedido : ${pedidos}">
         <h2>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h2>
+        <div class="action-row">
+            <a class="btn btn-secondary" th:href="@{/pedidos/{id}/recibo.pdf(id=${pedido.id})}">
+                Recibo PDF
+            </a>
+        </div>
         <p>Atendimento: <span th:text="${pedido.tipoAtendimento}"></span></p>
         <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
         <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
         <p>Total: R$ <span th:text="${pedido.total}"></span></p>
-        <p th:if="${pedido.pagamento}">
+        <p th:if="${pedido.pagamento != null}">
             Pagamento:
             <span th:text="${pedido.pagamento.formaPagamento}"></span>
             - R$ <span th:text="${pedido.pagamento.valor}"></span>
         </p>
+        <div class="payment-details" th:if="${pedido.pagamento != null}">
+            <span>Itens: R$ <strong th:text="${pedido.pagamento.valorOriginal ?: pedido.total}"></strong></span>
+            <span>Desconto: R$ <strong th:text="${pedido.pagamento.desconto ?: 0}"></strong></span>
+            <span>Taxa: R$ <strong th:text="${pedido.pagamento.taxaServico ?: 0}"></strong></span>
+        </div>
+        <ul class="payment-installments" th:if="${pedido.pagamento != null and !#lists.isEmpty(pedido.pagamento.parcelas)}">
+            <li th:each="parcela : ${pedido.pagamento.parcelas}">
+                <span th:text="${parcela.formaPagamento}"></span>
+                <strong>R$ <span th:text="${parcela.valor}"></span></strong>
+            </li>
+        </ul>
 
-        <ul>
-            <li th:each="item : ${pedido.itens}">
-                <span th:text="${item.quantidade}"></span>x
-                <span th:text="${item.nomeProduto}"></span>
-                - R$ <span th:text="${item.subtotal}"></span>
+        <ul class="order-items">
+            <li class="order-item-row" th:each="item : ${pedido.itens}">
+                <span>
+                    <span th:text="${item.quantidade}"></span>x
+                    <span th:text="${item.nomeProduto}"></span>
+                </span>
+                <strong>R$ <span th:text="${item.subtotal}"></span></strong>
             </li>
         </ul>
     </div>

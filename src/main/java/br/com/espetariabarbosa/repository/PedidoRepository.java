@@ -10,4 +10,5 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByStatusInOrderByCriadoEmAsc(List<StatusPedido> status);
     List<Pedido> findByStatusInOrderByCriadoEmDesc(List<StatusPedido> status);
     List<Pedido> findAllByOrderByCriadoEmDesc();
+    boolean existsByMesaAndStatusIn(String mesa, List<StatusPedido> status);
 }

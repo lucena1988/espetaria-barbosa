@@ -3,12 +3,14 @@ package br.com.espetariabarbosa.service;
 import br.com.espetariabarbosa.entity.ItemPedido;
 import br.com.espetariabarbosa.entity.Pedido;
 import br.com.espetariabarbosa.entity.Produto;
+import br.com.espetariabarbosa.enums.StatusMesa;
 import br.com.espetariabarbosa.enums.StatusPedido;
 import br.com.espetariabarbosa.enums.TipoAtendimento;
 import br.com.espetariabarbosa.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,19 +18,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PedidoService {
 
+    private static final List<StatusPedido> STATUS_ATIVOS = List.of(
+            StatusPedido.RECEBIDO,
+            StatusPedido.EM_PREPARO,
+            StatusPedido.PRONTO
+    );
+
     private final PedidoRepository pedidoRepository;
     private final ProdutoService produtoService;
     private final PedidoWebSocketService pedidoWebSocketService;
     private final ClienteService clienteService;
+    private final MesaService mesaService;
 
     public List<Pedido> listarTodos() {
         return pedidoRepository.findAllByOrderByCriadoEmDesc();
     }
 
     public List<Pedido> listarAtivos() {
-        return pedidoRepository.findByStatusInOrderByCriadoEmAsc(
-                List.of(StatusPedido.RECEBIDO, StatusPedido.EM_PREPARO, StatusPedido.PRONTO)
-        );
+        return pedidoRepository.findByStatusInOrderByCriadoEmAsc(STATUS_ATIVOS);
     }
 
     public List<Pedido> listarHistorico() {
@@ -96,6 +103,7 @@ public class PedidoService {
 
             ItemPedido item = ItemPedido.builder()
                     .nomeProduto(produto.getNome())
+                    .produtoId(produto.getId())
                     .quantidade(quantidade)
                     .precoUnitario(produto.getPreco())
                     .build();
@@ -110,6 +118,7 @@ public class PedidoService {
         itensEstoque.forEach(item -> produtoService.baixarEstoque(item.produto(), item.quantidade()));
 
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        ocuparMesaSePedidoAtivo(pedidoSalvo);
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
         return pedidoSalvo;
     }
@@ -118,13 +127,148 @@ public class PedidoService {
         Pedido pedido = buscarPorId(pedidoId);
         pedido.setStatus(status);
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        atualizarStatusMesaDepoisDoStatus(pedidoSalvo);
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
+    }
+
+    public void transferirMesa(Long pedidoId, String novaMesa) {
+        if (novaMesa == null || novaMesa.isBlank()) {
+            throw new IllegalArgumentException("Informe a nova mesa para transferir o pedido");
+        }
+
+        Pedido pedido = buscarPorId(pedidoId);
+        String mesaAnterior = pedido.getMesa();
+
+        if (novaMesa.equals(mesaAnterior)) {
+            return;
+        }
+
+        pedido.setMesa(novaMesa);
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        liberarMesaSeNaoTemPedidoAtivo(mesaAnterior);
+        ocuparMesaSePedidoAtivo(pedidoSalvo);
+        pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
+    }
+
+    public void adicionarItem(Long pedidoId, Long produtoId, Integer quantidade) {
+        if (produtoId == null) {
+            throw new IllegalArgumentException("Selecione um produto para adicionar ao pedido");
+        }
+        if (quantidade == null || quantidade <= 0) {
+            throw new IllegalArgumentException("Informe uma quantidade valida");
+        }
+
+        Pedido pedido = buscarPorId(pedidoId);
+        if (!STATUS_ATIVOS.contains(pedido.getStatus())) {
+            throw new IllegalArgumentException("So e possivel adicionar itens em pedidos abertos");
+        }
+
+        Produto produto = produtoService.buscarPorId(produtoId);
+        if (!produto.possuiEstoque(quantidade)) {
+            throw new IllegalArgumentException("Estoque insuficiente para " + produto.getNome());
+        }
+
+        ItemPedido item = ItemPedido.builder()
+                .nomeProduto(produto.getNome())
+                .produtoId(produto.getId())
+                .quantidade(quantidade)
+                .precoUnitario(produto.getPreco())
+                .build();
+
+        produtoService.baixarEstoque(produto, quantidade);
+        pedido.adicionarItem(item);
+
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
+    }
+
+    public void removerItem(Long pedidoId, Long itemId) {
+        Pedido pedido = buscarPorId(pedidoId);
+        if (!STATUS_ATIVOS.contains(pedido.getStatus())) {
+            throw new IllegalArgumentException("So e possivel remover itens de pedidos abertos");
+        }
+
+        ItemPedido item = pedido.getItens().stream()
+                .filter(itemPedido -> itemPedido.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Item nao encontrado no pedido"));
+
+        produtoService.reporEstoque(item.getProdutoId(), item.getNomeProduto(), item.getQuantidade());
+        pedido.getItens().remove(item);
+        pedido.recalcularTotal();
+
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
+    }
+
+    public void juntarPedidos(Long pedidoOrigemId, Long pedidoDestinoId) {
+        if (pedidoDestinoId == null) {
+            throw new IllegalArgumentException("Selecione a comanda de destino");
+        }
+        if (pedidoOrigemId.equals(pedidoDestinoId)) {
+            throw new IllegalArgumentException("Selecione uma comanda diferente para juntar");
+        }
+
+        Pedido origem = buscarPorId(pedidoOrigemId);
+        Pedido destino = buscarPorId(pedidoDestinoId);
+
+        if (!STATUS_ATIVOS.contains(origem.getStatus()) || !STATUS_ATIVOS.contains(destino.getStatus())) {
+            throw new IllegalArgumentException("So e possivel juntar pedidos abertos");
+        }
+
+        origem.getItens().forEach(item -> {
+            ItemPedido itemDestino = ItemPedido.builder()
+                    .nomeProduto(item.getNomeProduto())
+                    .produtoId(item.getProdutoId())
+                    .quantidade(item.getQuantidade())
+                    .precoUnitario(item.getPrecoUnitario())
+                    .build();
+            destino.adicionarItem(itemDestino);
+        });
+
+        String mesaOrigem = origem.getMesa();
+        origem.getItens().clear();
+        origem.setTotal(BigDecimal.ZERO);
+        origem.setStatus(StatusPedido.CANCELADO);
+
+        Pedido destinoSalvo = pedidoRepository.save(destino);
+        Pedido origemSalva = pedidoRepository.save(origem);
+        liberarMesaSeNaoTemPedidoAtivo(mesaOrigem);
+        ocuparMesaSePedidoAtivo(destinoSalvo);
+        pedidoWebSocketService.notificarAtualizacao(destinoSalvo);
+        pedidoWebSocketService.notificarAtualizacao(origemSalva);
     }
 
     public Pedido salvar(Pedido pedido) {
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
+        atualizarStatusMesaDepoisDoStatus(pedidoSalvo);
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
         return pedidoSalvo;
+    }
+
+    private void atualizarStatusMesaDepoisDoStatus(Pedido pedido) {
+        if (STATUS_ATIVOS.contains(pedido.getStatus())) {
+            ocuparMesaSePedidoAtivo(pedido);
+            return;
+        }
+
+        liberarMesaSeNaoTemPedidoAtivo(pedido.getMesa());
+    }
+
+    private void ocuparMesaSePedidoAtivo(Pedido pedido) {
+        if (pedido.getTipoAtendimento() == TipoAtendimento.MESA && STATUS_ATIVOS.contains(pedido.getStatus())) {
+            mesaService.atualizarStatusPorNumeroSeExistir(pedido.getMesa(), StatusMesa.OCUPADA);
+        }
+    }
+
+    private void liberarMesaSeNaoTemPedidoAtivo(String mesa) {
+        if (mesa == null || mesa.isBlank()) {
+            return;
+        }
+
+        if (!pedidoRepository.existsByMesaAndStatusIn(mesa, STATUS_ATIVOS)) {
+            mesaService.atualizarStatusPorNumeroSeExistir(mesa, StatusMesa.LIVRE);
+        }
     }
 
     private record ItemEstoque(Produto produto, Integer quantidade) {

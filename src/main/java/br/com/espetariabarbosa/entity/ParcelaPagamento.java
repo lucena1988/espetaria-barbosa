@@ -7,8 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,9 +15,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -26,34 +22,17 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-public class Pagamento {
+public class ParcelaPagamento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    private Pedido pedido;
+    @ManyToOne
+    private Pagamento pagamento;
 
     @Enumerated(EnumType.STRING)
     private FormaPagamento formaPagamento;
 
-    private BigDecimal valorOriginal;
-
-    private BigDecimal desconto;
-
-    private BigDecimal taxaServico;
-
     private BigDecimal valor;
-
-    private LocalDateTime pagoEm;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "pagamento", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
-    private List<ParcelaPagamento> parcelas = new ArrayList<>();
-
-    public void adicionarParcela(ParcelaPagamento parcela) {
-        parcela.setPagamento(this);
-        parcelas.add(parcela);
-    }
 }

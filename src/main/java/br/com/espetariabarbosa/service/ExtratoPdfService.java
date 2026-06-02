@@ -123,6 +123,8 @@ public class ExtratoPdfService {
                 return;
             }
 
+
+
             tableHeader();
             boolean shaded = false;
             for (Pedido pedido : extrato.pedidos()) {
@@ -172,15 +174,40 @@ public class ExtratoPdfService {
 
             Pagamento pagamento = pedido.getPagamento();
             String criadoEm = pedido.getCriadoEm() == null ? "-" : pedido.getCriadoEm().format(DATA_HORA);
-            String pagamentoTexto = pagamento == null ? "PENDENTE" : label(pagamento.getFormaPagamento().name());
+            String pagamentoTexto = pagamento == null ? "PENDENTE" : formasPagamento(pagamento);
 
             drawText("#" + pedido.getId(), MARGIN + 6, y - 12, PDType1Font.HELVETICA, 8);
             drawText(criadoEm, MARGIN + 52, y - 12, PDType1Font.HELVETICA, 8);
             drawText(truncate(pedido.getNomeCliente(), 24), MARGIN + 134, y - 12, PDType1Font.HELVETICA, 8);
-            drawText(label(pedido.getStatus().name()), MARGIN + 292, y - 12, PDType1Font.HELVETICA, 8);
+            drawText(pedido.getStatus() == null ? "-" : label(pedido.getStatus().name()), MARGIN + 292, y - 12, PDType1Font.HELVETICA, 8);
             drawText(truncate(pagamentoTexto, 16), MARGIN + 370, y - 12, PDType1Font.HELVETICA, 8);
-            drawText(money(pedido.getTotal()), MARGIN + 478, y - 12, PDType1Font.HELVETICA_BOLD, 8);
+            drawText(money(valorFinanceiro(pedido)), MARGIN + 478, y - 12, PDType1Font.HELVETICA_BOLD, 8);
             y -= 22;
+        }
+
+        private BigDecimal valorFinanceiro(Pedido pedido) {
+            if (pedido.getPagamento() != null && pedido.getPagamento().getValor() != null) {
+                return pedido.getPagamento().getValor();
+            }
+
+            return pedido.getTotal();
+        }
+
+        private String formasPagamento(Pagamento pagamento) {
+            if (pagamento.getParcelas() != null && !pagamento.getParcelas().isEmpty()) {
+                return pagamento.getParcelas().stream()
+                        .filter(parcela -> parcela.getFormaPagamento() != null)
+                        .map(parcela -> label(parcela.getFormaPagamento().name()))
+                        .distinct()
+                        .reduce((primeira, segunda) -> primeira + " + " + segunda)
+                        .orElse("-");
+            }
+
+            if (pagamento.getFormaPagamento() == null) {
+                return "-";
+            }
+
+            return label(pagamento.getFormaPagamento().name());
         }
 
         private void section(String text) throws IOException {
