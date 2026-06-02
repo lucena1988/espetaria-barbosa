@@ -20,6 +20,7 @@ build/
 # Logs
 *.log
 logs/
+backups/
 
 # OS files
 .DS_Store

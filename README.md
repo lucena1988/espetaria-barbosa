@@ -85,6 +85,23 @@ Para apagar tambem os dados locais do PostgreSQL:
 docker compose down -v
 ```
 
+## Operacao offline no cliente
+
+O sistema pode rodar sem internet em um computador principal da loja, usando Docker e PostgreSQL local.
+
+Scripts Windows disponiveis:
+
+- `scripts\start.bat`: inicia o sistema.
+- `scripts\stop.bat`: para o sistema.
+- `scripts\backup.bat`: gera backup local em `backups\`.
+- `scripts\restore.bat`: restaura um backup local.
+
+Guia completo:
+
+```text
+INSTALL.md
+```
+
 ## Banco PostgreSQL no Docker
 
 ```text
