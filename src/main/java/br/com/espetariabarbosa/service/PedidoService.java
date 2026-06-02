@@ -6,9 +6,11 @@ import br.com.espetariabarbosa.entity.Produto;
 import br.com.espetariabarbosa.enums.StatusMesa;
 import br.com.espetariabarbosa.enums.StatusPedido;
 import br.com.espetariabarbosa.enums.TipoAtendimento;
+import br.com.espetariabarbosa.repository.ItemPedidoRepository;
 import br.com.espetariabarbosa.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ public class PedidoService {
     private final PedidoWebSocketService pedidoWebSocketService;
     private final ClienteService clienteService;
     private final MesaService mesaService;
+    private final ItemPedidoRepository itemPedidoRepository;
 
     public List<Pedido> listarTodos() {
         return pedidoRepository.findAllByOrderByCriadoEmDesc();
@@ -64,6 +67,7 @@ public class PedidoService {
         return criarPedido(null, nomeCliente, mesa, tipoAtendimento, produtoIds, quantidades);
     }
 
+    @Transactional
     public Pedido criarPedido(Long clienteId, String nomeCliente, String mesa, TipoAtendimento tipoAtendimento,
                               List<Long> produtoIds, List<Integer> quantidades) {
         var cliente = clienteId != null ? clienteService.buscarPorId(clienteId) : null;
@@ -123,6 +127,7 @@ public class PedidoService {
         return pedidoSalvo;
     }
 
+    @Transactional
     public void alterarStatus(Long pedidoId, StatusPedido status) {
         Pedido pedido = buscarPorId(pedidoId);
         pedido.setStatus(status);
@@ -131,6 +136,7 @@ public class PedidoService {
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
     }
 
+    @Transactional
     public void transferirMesa(Long pedidoId, String novaMesa) {
         if (novaMesa == null || novaMesa.isBlank()) {
             throw new IllegalArgumentException("Informe a nova mesa para transferir o pedido");
@@ -150,6 +156,7 @@ public class PedidoService {
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
     }
 
+    @Transactional
     public void adicionarItem(Long pedidoId, Long produtoId, Integer quantidade) {
         if (produtoId == null) {
             throw new IllegalArgumentException("Selecione um produto para adicionar ao pedido");
@@ -175,13 +182,18 @@ public class PedidoService {
                 .precoUnitario(produto.getPreco())
                 .build();
 
-        produtoService.baixarEstoque(produto, quantidade);
-        pedido.adicionarItem(item);
+        item.setPedido(pedido);
+        item.calcularSubtotal();
+        ItemPedido itemSalvo = itemPedidoRepository.save(item);
+        pedido.getItens().add(itemSalvo);
+        pedido.recalcularTotal();
 
+        produtoService.baixarEstoque(produto, quantidade);
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
     }
 
+    @Transactional
     public void removerItem(Long pedidoId, Long itemId) {
         Pedido pedido = buscarPorId(pedidoId);
         if (!STATUS_ATIVOS.contains(pedido.getStatus())) {
@@ -201,6 +213,7 @@ public class PedidoService {
         pedidoWebSocketService.notificarAtualizacao(pedidoSalvo);
     }
 
+    @Transactional
     public void juntarPedidos(Long pedidoOrigemId, Long pedidoDestinoId) {
         if (pedidoDestinoId == null) {
             throw new IllegalArgumentException("Selecione a comanda de destino");
@@ -223,7 +236,11 @@ public class PedidoService {
                     .quantidade(item.getQuantidade())
                     .precoUnitario(item.getPrecoUnitario())
                     .build();
-            destino.adicionarItem(itemDestino);
+            itemDestino.setPedido(destino);
+            itemDestino.calcularSubtotal();
+            ItemPedido itemSalvo = itemPedidoRepository.save(itemDestino);
+            destino.getItens().add(itemSalvo);
+            destino.recalcularTotal();
         });
 
         String mesaOrigem = origem.getMesa();
@@ -239,6 +256,7 @@ public class PedidoService {
         pedidoWebSocketService.notificarAtualizacao(origemSalva);
     }
 
+    @Transactional
     public Pedido salvar(Pedido pedido) {
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         atualizarStatusMesaDepoisDoStatus(pedidoSalvo);
