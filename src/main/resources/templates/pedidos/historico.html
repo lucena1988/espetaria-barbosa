@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Historico de Pedidos - Espetaria Barbosa</title>
+    <script>
+        if (localStorage.getItem('espetariaTema') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -19,6 +24,10 @@
     <a href="/funcionarios">Funcionarios</a>
     <a href="/cozinha">Cozinha</a>
     <a href="/painel" target="_blank">Painel TV</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
+        <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
+        <span data-theme-label>Modo light</span>
+    </button>
     <form class="logout-form" method="post" action="/logout">
         <button class="btn-secondary" type="submit">Sair</button>
     </form>
@@ -30,17 +39,27 @@
     </div>
 
     <p class="empty-state" th:if="${#lists.isEmpty(pedidos)}">Nenhum pedido finalizado ainda.</p>
+    <p class="success-message" th:if="${sucesso}" th:text="${sucesso}"></p>
+    <p class="error-message" th:if="${erro}" th:text="${erro}"></p>
 
-    <div class="card" th:each="pedido : ${pedidos}">
-        <h2>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h2>
+    <div class="card order-card" th:each="pedido : ${pedidos}">
+        <div class="order-card-header">
+            <div>
+                <span class="order-number-badge">Pedido #<span th:text="${pedido.id}"></span></span>
+                <h2 th:text="${pedido.nomeCliente}"></h2>
+            </div>
+            <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span>
+        </div>
         <div class="action-row">
             <a class="btn btn-secondary" th:href="@{/pedidos/{id}/recibo.pdf(id=${pedido.id})}">
                 Recibo PDF
             </a>
+            <form method="post" th:action="@{/pedidos/{id}/ocultar-historico(id=${pedido.id})}">
+                <button class="btn-secondary" type="submit">Ocultar</button>
+            </form>
         </div>
         <p>Atendimento: <span th:text="${pedido.tipoAtendimento}"></span></p>
         <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
-        <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
         <p>Total: R$ <span th:text="${pedido.total}"></span></p>
         <p th:if="${pedido.pagamento != null}">
             Pagamento:
@@ -70,5 +89,6 @@
         </ul>
     </div>
 </div>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

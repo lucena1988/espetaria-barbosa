@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - Espetaria Barbosa</title>
+    <script>
+        if (localStorage.getItem('espetariaTema') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -24,5 +29,6 @@
         <button type="submit">Entrar</button>
     </form>
 </main>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

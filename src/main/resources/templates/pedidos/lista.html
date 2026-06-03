@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Pedidos - Espetaria Barbosa</title>
+    <script>
+        if (localStorage.getItem('espetariaTema') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -19,6 +24,10 @@
     <a href="/funcionarios">Funcionarios</a>
     <a href="/cozinha">Cozinha</a>
     <a href="/painel" target="_blank">Painel TV</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
+        <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
+        <span data-theme-label>Modo light</span>
+    </button>
     <form class="logout-form" method="post" action="/logout">
         <button class="btn-secondary" type="submit">Sair</button>
     </form>
@@ -36,12 +45,20 @@
     <p class="success-message" th:if="${sucesso}" th:text="${sucesso}"></p>
     <p class="error-message" th:if="${erro}" th:text="${erro}"></p>
 
-    <div class="card" th:each="pedido : ${pedidos}">
-        <h2>#<span th:text="${pedido.id}"></span> - <span th:text="${pedido.nomeCliente}"></span></h2>
-        <p>Atendimento: <span th:text="${pedido.tipoAtendimento}"></span></p>
-        <p>Mesa/Referencia: <span th:text="${pedido.mesa}"></span></p>
-        <p>Status: <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span></p>
-        <p>Total: R$ <span th:text="${pedido.total}"></span></p>
+    <div class="card order-card" th:each="pedido : ${pedidos}">
+        <div class="order-card-header">
+            <div>
+                <span class="order-number-badge">Pedido #<span th:text="${pedido.id}"></span></span>
+                <h2 th:text="${pedido.nomeCliente}"></h2>
+            </div>
+            <span th:class="'status ' + ${pedido.status}" th:text="${pedido.status}"></span>
+        </div>
+
+        <div class="order-meta">
+            <span>Atendimento <strong th:text="${pedido.tipoAtendimento}"></strong></span>
+            <span>Mesa/Referencia <strong th:text="${pedido.mesa}"></strong></span>
+            <span>Total <strong>R$ <span th:text="${pedido.total}"></span></strong></span>
+        </div>
 
         <ul class="order-items">
             <li class="order-item-row" th:each="item : ${pedido.itens}">
@@ -57,65 +74,68 @@
             </li>
         </ul>
 
-        <form class="add-item-form"
-              method="post"
-              th:if="${!#lists.isEmpty(produtos)}"
-              th:action="@{/pedidos/{id}/itens(id=${pedido.id})}">
-            <select name="produtoId" required>
-                <option value="">Adicionar produto...</option>
-                <option th:each="produto : ${produtos}"
-                        th:value="${produto.id}"
-                        th:disabled="${produto.esgotado()}"
-                        th:text="${produto.nome + ' - R$ ' + produto.preco + ' | Estoque: ' + produto.quantidadeEstoque}">
-                </option>
-            </select>
-            <input name="quantidade" type="number" min="1" value="1" required>
-            <button type="submit">Adicionar item</button>
-        </form>
+        <div class="order-actions-panel">
+            <form class="add-item-form"
+                  method="post"
+                  th:if="${!#lists.isEmpty(produtos)}"
+                  th:action="@{/pedidos/{id}/itens(id=${pedido.id})}">
+                <select name="produtoId" required>
+                    <option value="">Adicionar produto...</option>
+                    <option th:each="produto : ${produtos}"
+                            th:value="${produto.id}"
+                            th:disabled="${produto.esgotado()}"
+                            th:text="${produto.nome + ' - R$ ' + produto.preco + ' | Estoque: ' + produto.quantidadeEstoque}">
+                    </option>
+                </select>
+                <input name="quantidade" type="number" min="1" value="1" required>
+                <button type="submit">Adicionar item</button>
+            </form>
 
-        <form method="post" th:action="@{/pedidos/{id}/status(id=${pedido.id})}">
-            <select name="status">
-                <option value="RECEBIDO">Recebido</option>
-                <option value="EM_PREPARO">Em preparo</option>
-                <option value="PRONTO">Pronto</option>
-                <option value="ENTREGUE">Entregue</option>
-                <option value="CANCELADO">Cancelado</option>
-            </select>
-            <button type="submit">Alterar Status</button>
-        </form>
+            <form class="status-form" method="post" th:action="@{/pedidos/{id}/status(id=${pedido.id})}">
+                <select name="status">
+                    <option value="RECEBIDO">Recebido</option>
+                    <option value="EM_PREPARO">Em preparo</option>
+                    <option value="PRONTO">Pronto</option>
+                    <option value="ENTREGUE">Entregue</option>
+                    <option value="CANCELADO">Cancelado</option>
+                </select>
+                <button type="submit">Alterar Status</button>
+            </form>
 
-        <form class="transfer-form"
-              method="post"
-              th:if="${pedido.tipoAtendimento.name() == 'MESA' and !#lists.isEmpty(mesas)}"
-              th:action="@{/pedidos/{id}/transferir-mesa(id=${pedido.id})}">
-            <select name="novaMesa" required>
-                <option value="">Transferir para...</option>
-                <option th:each="mesaOpcao : ${mesas}"
-                        th:value="${mesaOpcao.numero}"
-                        th:selected="${mesaOpcao.numero == pedido.mesa}"
-                        th:text="${mesaOpcao.numero}">
-                </option>
-            </select>
-            <button class="btn-secondary" type="submit">Transferir mesa</button>
-        </form>
+            <form class="transfer-form"
+                  method="post"
+                  th:if="${pedido.tipoAtendimento.name() == 'MESA' and !#lists.isEmpty(mesas)}"
+                  th:action="@{/pedidos/{id}/transferir-mesa(id=${pedido.id})}">
+                <select name="novaMesa" required>
+                    <option value="">Transferir para...</option>
+                    <option th:each="mesaOpcao : ${mesas}"
+                            th:value="${mesaOpcao.numero}"
+                            th:selected="${mesaOpcao.numero == pedido.mesa}"
+                            th:text="${mesaOpcao.numero}">
+                    </option>
+                </select>
+                <button class="btn-secondary" type="submit">Transferir mesa</button>
+            </form>
 
-        <form class="merge-order-form"
-              method="post"
-              th:if="${#lists.size(pedidosUnificaveis) > 1}"
-              th:action="@{/pedidos/{id}/juntar(id=${pedido.id})}">
-            <select name="pedidoDestinoId" required>
-                <option value="">Juntar comanda em...</option>
-                <option th:each="pedidoDestino : ${pedidosUnificaveis}"
-                        th:if="${pedidoDestino.id != pedido.id}"
-                        th:value="${pedidoDestino.id}"
-                        th:text="${'#' + pedidoDestino.id + ' - ' + pedidoDestino.nomeCliente + ' | ' + pedidoDestino.mesa}">
-                </option>
-            </select>
-            <button class="btn-secondary" type="submit">Juntar comanda</button>
-        </form>
+            <form class="merge-order-form"
+                  method="post"
+                  th:if="${#lists.size(pedidosUnificaveis) > 1}"
+                  th:action="@{/pedidos/{id}/juntar(id=${pedido.id})}">
+                <select name="pedidoDestinoId" required>
+                    <option value="">Juntar comanda em...</option>
+                    <option th:each="pedidoDestino : ${pedidosUnificaveis}"
+                            th:if="${pedidoDestino.id != pedido.id}"
+                            th:value="${pedidoDestino.id}"
+                            th:text="${'#' + pedidoDestino.id + ' - ' + pedidoDestino.nomeCliente + ' | ' + pedidoDestino.mesa}">
+                    </option>
+                </select>
+                <button class="btn-secondary" type="submit">Juntar comanda</button>
+            </form>
 
-        <a class="btn" th:href="@{/pagamentos/pedido/{id}(id=${pedido.id})}">Fechar conta</a>
+            <a class="btn checkout-btn" th:href="@{/pagamentos/pedido/{id}(id=${pedido.id})}">Fechar conta</a>
+        </div>
     </div>
 </div>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

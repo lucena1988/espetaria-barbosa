@@ -61,6 +61,18 @@ public class PedidoController {
                 .body(pdf);
     }
 
+    @PostMapping("/{id}/ocultar-historico")
+    public String ocultarHistorico(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            pedidoService.ocultarDoHistorico(id);
+            redirectAttributes.addFlashAttribute("sucesso", "Pedido #" + id + " ocultado do historico");
+        } catch (IllegalArgumentException exception) {
+            redirectAttributes.addFlashAttribute("erro", exception.getMessage());
+        }
+
+        return "redirect:/pedidos/historico";
+    }
+
     @GetMapping("/novo")
     public String novo(@RequestParam(required = false) String erro, Model model) {
         model.addAttribute("produtos", produtoService.listarAtivos());

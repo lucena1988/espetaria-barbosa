@@ -44,7 +44,9 @@ public class PedidoService {
     public List<Pedido> listarHistorico() {
         return pedidoRepository.findByStatusInOrderByCriadoEmDesc(
                 List.of(StatusPedido.ENTREGUE, StatusPedido.CANCELADO)
-        );
+        ).stream()
+                .filter(pedido -> !Boolean.TRUE.equals(pedido.getOcultoHistorico()))
+                .toList();
     }
 
     public List<Pedido> listarPainel() {
@@ -60,6 +62,17 @@ public class PedidoService {
     public Pedido buscarPorId(Long pedidoId) {
         return pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido nao encontrado"));
+    }
+
+    @Transactional
+    public void ocultarDoHistorico(Long pedidoId) {
+        Pedido pedido = buscarPorId(pedidoId);
+        if (!List.of(StatusPedido.ENTREGUE, StatusPedido.CANCELADO).contains(pedido.getStatus())) {
+            throw new IllegalArgumentException("So e possivel ocultar pedidos finalizados do historico");
+        }
+
+        pedido.setOcultoHistorico(true);
+        pedidoRepository.save(pedido);
     }
 
     public Pedido criarPedido(String nomeCliente, String mesa, TipoAtendimento tipoAtendimento,

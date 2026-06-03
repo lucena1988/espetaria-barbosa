@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Novo Pedido - Espetaria Barbosa</title>
+    <script>
+        if (localStorage.getItem('espetariaTema') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -18,68 +23,94 @@
     <a href="/funcionarios">Funcionarios</a>
     <a href="/cozinha">Cozinha</a>
     <a href="/painel" target="_blank">Painel TV</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
+        <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
+        <span data-theme-label>Modo light</span>
+    </button>
     <form class="logout-form" method="post" action="/logout">
         <button class="btn-secondary" type="submit">Sair</button>
     </form>
 </div>
 <div class="container">
-    <h1>Novo Pedido</h1>
+    <div class="page-header">
+        <div>
+            <h1>Novo Pedido</h1>
+            <span class="muted">Monte a comanda e envie para a cozinha</span>
+        </div>
+        <a class="btn btn-secondary" href="/pedidos">Voltar</a>
+    </div>
 
     <div class="error-message" th:if="${erro}" th:text="${erro}"></div>
 
-    <div class="card">
+    <div class="card new-order-card">
         <form method="post" action="/pedidos">
-            <select id="cliente-select" name="clienteId">
-                <option value="">Cliente avulso</option>
-                <option th:each="cliente : ${clientes}"
-                        th:value="${cliente.id}"
-                        th:text="${cliente.nome + ((cliente.telefone != null and !#strings.isEmpty(cliente.telefone)) ? ' - ' + cliente.telefone : '')}">
-                </option>
-            </select>
-
-            <input id="nome-cliente" name="nomeCliente" placeholder="Nome do cliente avulso" required>
-
-            <select id="tipo-atendimento" name="tipoAtendimento" required>
-                <option th:each="tipo : ${tiposAtendimento}"
-                        th:value="${tipo}"
-                        th:text="${tipo}">
-                </option>
-            </select>
-
-            <select id="mesa-select" name="mesa">
-                <option value="">Selecione a mesa</option>
-                <option th:each="mesa : ${mesas}"
-                        th:value="${mesa.numero}"
-                        th:text="${mesa.numero + ' - ' + mesa.status}">
-                </option>
-            </select>
-
-            <input id="referencia-atendimento"
-                   name="mesa"
-                   placeholder="Referencia. Ex: Balcao, telefone ou endereco"
-                   disabled>
-
-            <h2>Itens do pedido</h2>
-
-            <div id="itens-pedido">
-                <div class="item-row">
-                    <select name="produtoIds" required>
-                        <option value="">Selecione o produto</option>
-                        <option th:each="produto : ${produtos}"
-                                th:value="${produto.id}"
-                                th:disabled="${produto.esgotado()}"
-                                th:text="${produto.nome + ' - R$ ' + produto.preco + ' - Estoque: ' + produto.quantidadeEstoque}">
+            <section class="form-section">
+                <span class="eyebrow">Cliente</span>
+                <div class="form-grid">
+                    <select id="cliente-select" name="clienteId">
+                        <option value="">Cliente avulso</option>
+                        <option th:each="cliente : ${clientes}"
+                                th:value="${cliente.id}"
+                                th:text="${cliente.nome + ((cliente.telefone != null and !#strings.isEmpty(cliente.telefone)) ? ' - ' + cliente.telefone : '')}">
                         </option>
                     </select>
 
-                    <input name="quantidades" type="number" min="1" value="1" required>
-                    <button class="btn-secondary remover-item" type="button">Remover</button>
+                    <input id="nome-cliente" name="nomeCliente" placeholder="Nome do cliente avulso" required>
                 </div>
-            </div>
+            </section>
 
-            <button class="btn-secondary" id="adicionar-item" type="button">Adicionar item</button>
+            <section class="form-section">
+                <span class="eyebrow">Atendimento</span>
+                <div class="form-grid">
+                    <select id="tipo-atendimento" name="tipoAtendimento" required>
+                        <option th:each="tipo : ${tiposAtendimento}"
+                                th:value="${tipo}"
+                                th:text="${tipo}">
+                        </option>
+                    </select>
 
-            <button type="submit">Criar Pedido</button>
+                    <select id="mesa-select" name="mesa">
+                        <option value="">Selecione a mesa</option>
+                        <option th:each="mesa : ${mesas}"
+                                th:value="${mesa.numero}"
+                                th:text="${mesa.numero + ' - ' + mesa.status}">
+                        </option>
+                    </select>
+
+                    <input id="referencia-atendimento"
+                           name="mesa"
+                           placeholder="Referencia. Ex: Balcao, telefone ou endereco"
+                           disabled>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="section-title-row">
+                    <div>
+                        <span class="eyebrow">Comanda</span>
+                        <h2>Itens do pedido</h2>
+                    </div>
+                    <button class="btn-secondary" id="adicionar-item" type="button">Adicionar item</button>
+                </div>
+
+                <div id="itens-pedido" class="order-builder">
+                    <div class="item-row">
+                        <select name="produtoIds" required>
+                            <option value="">Selecione o produto</option>
+                            <option th:each="produto : ${produtos}"
+                                    th:value="${produto.id}"
+                                    th:disabled="${produto.esgotado()}"
+                                    th:text="${produto.nome + ' - R$ ' + produto.preco + ' - Estoque: ' + produto.quantidadeEstoque}">
+                            </option>
+                        </select>
+
+                        <input name="quantidades" type="number" min="1" value="1" required>
+                        <button class="btn-secondary remover-item" type="button">Remover</button>
+                    </div>
+                </div>
+            </section>
+
+            <button class="create-order-btn" type="submit">Criar Pedido</button>
         </form>
     </div>
 </div>
@@ -154,5 +185,6 @@
     atualizarCampoAtendimento();
     atualizarCampoCliente();
 </script>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

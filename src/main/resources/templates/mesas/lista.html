@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Mesas - Espetaria Barbosa</title>
+    <script>
+        if (localStorage.getItem('espetariaTema') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -18,12 +23,24 @@
     <a href="/funcionarios">Funcionarios</a>
     <a href="/cozinha">Cozinha</a>
     <a href="/painel" target="_blank">Painel TV</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
+        <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
+        <span data-theme-label>Modo light</span>
+    </button>
     <form class="logout-form" method="post" action="/logout">
         <button class="btn-secondary" type="submit">Sair</button>
     </form>
 </div>
 <div class="container">
-    <h1>Mesas</h1>
+    <div class="page-header">
+        <div>
+            <h1>Mesas</h1>
+            <span class="muted">Cadastre, edite e organize as mesas do atendimento</span>
+        </div>
+    </div>
+
+    <p class="success-message" th:if="${sucesso}" th:text="${sucesso}"></p>
+    <p class="error-message" th:if="${erro}" th:text="${erro}"></p>
 
     <div class="card">
         <h2>Nova Mesa</h2>
@@ -56,8 +73,23 @@
                 </select>
                 <button type="submit">Atualizar</button>
             </form>
+
+            <div class="mesa-actions">
+                <form class="mesa-rename-form" method="post" th:action="@{/mesas/{id}/renomear(id=${mesa.id})}">
+                    <input name="numero" th:value="${mesa.numero}" placeholder="Nome da mesa" required>
+                    <input name="descricao" th:value="${mesa.descricao}" placeholder="Descricao opcional">
+                    <button class="btn-secondary" type="submit">Renomear</button>
+                </form>
+
+                <form method="post"
+                      th:action="@{/mesas/{id}/excluir(id=${mesa.id})}"
+                      onsubmit="return confirm('Deseja excluir esta mesa da tela? Pedidos antigos continuam registrados.');">
+                    <button class="btn-danger" type="submit">Excluir mesa</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

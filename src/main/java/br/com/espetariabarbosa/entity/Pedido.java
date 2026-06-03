@@ -40,6 +40,9 @@ public class Pedido {
     private BigDecimal total;
 
     @Builder.Default
+    private Boolean ocultoHistorico = false;
+
+    @Builder.Default
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> itens = new ArrayList<>();
 
@@ -71,6 +74,9 @@ public class Pedido {
         }
         if (tipoAtendimento == null) {
             tipoAtendimento = TipoAtendimento.MESA;
+        }
+        if (ocultoHistorico == null) {
+            ocultoHistorico = false;
         }
         recalcularTotal();
     }

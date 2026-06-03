@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Painel TV - Espetaria Barbosa</title>
+    <script>
+        if (localStorage.getItem('espetariaTema') === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <meta http-equiv="refresh" content="5">
 </head>
@@ -17,7 +22,7 @@
         <div class="painel-card preparo"
              th:each="pedido : ${pedidos}"
              th:if="${pedido.status.name() == 'EM_PREPARO'}">
-            <strong>#<span th:text="${pedido.id}"></span></strong>
+            <strong class="order-number-badge painel-order-number">Pedido #<span th:text="${pedido.id}"></span></strong>
             <div th:text="${pedido.nomeCliente}"></div>
             <small th:text="${pedido.tipoAtendimento + ' - ' + pedido.mesa}"></small>
         </div>
@@ -29,7 +34,7 @@
         <div class="painel-card pronto"
              th:each="pedido : ${pedidos}"
              th:if="${pedido.status.name() == 'PRONTO'}">
-            <strong>#<span th:text="${pedido.id}"></span></strong>
+            <strong class="order-number-badge painel-order-number">Pedido #<span th:text="${pedido.id}"></span></strong>
             <div th:text="${pedido.nomeCliente}"></div>
             <small>Retire seu pedido</small>
         </div>
@@ -126,5 +131,6 @@
         });
     });
 </script>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

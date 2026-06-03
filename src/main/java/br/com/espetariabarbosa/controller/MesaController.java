@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.ByteArrayOutputStream;
@@ -43,6 +44,31 @@ public class MesaController {
     @PostMapping("/{id}/status")
     public String alterarStatus(@PathVariable Long id, @RequestParam StatusMesa status) {
         mesaService.alterarStatus(id, status);
+        return "redirect:/mesas";
+    }
+
+    @PostMapping("/{id}/renomear")
+    public String renomear(@PathVariable Long id,
+                           @RequestParam String numero,
+                           @RequestParam(required = false) String descricao,
+                           RedirectAttributes redirectAttributes) {
+        try {
+            mesaService.renomear(id, numero, descricao);
+            redirectAttributes.addFlashAttribute("sucesso", "Mesa atualizada com sucesso");
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute("erro", exception.getMessage());
+        }
+        return "redirect:/mesas";
+    }
+
+    @PostMapping("/{id}/excluir")
+    public String excluir(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            mesaService.excluir(id);
+            redirectAttributes.addFlashAttribute("sucesso", "Mesa excluida da tela com sucesso");
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute("erro", exception.getMessage());
+        }
         return "redirect:/mesas";
     }
 
