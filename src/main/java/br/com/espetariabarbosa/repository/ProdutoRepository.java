@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     List<Produto> findByAtivoTrueOrderByNomeAsc();
+    List<Produto> findByAtivoFalseOrderByNomeAsc();
     Optional<Produto> findFirstByNome(String nome);
 }

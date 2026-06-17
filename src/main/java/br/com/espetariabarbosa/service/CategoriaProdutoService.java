@@ -17,6 +17,10 @@ public class CategoriaProdutoService {
         return categoriaProdutoRepository.findByAtivaTrueOrderByNomeAsc();
     }
 
+    public List<CategoriaProduto> listarInativas() {
+        return categoriaProdutoRepository.findByAtivaFalseOrderByNomeAsc();
+    }
+
     public List<CategoriaProduto> listarTodas() {
         return categoriaProdutoRepository.findAllByOrderByNomeAsc();
     }
@@ -31,5 +35,17 @@ public class CategoriaProdutoService {
     public CategoriaProduto buscarPorId(Long id) {
         return categoriaProdutoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Categoria nao encontrada"));
+    }
+
+    public void arquivar(Long id) {
+        CategoriaProduto categoriaProduto = buscarPorId(id);
+        categoriaProduto.setAtiva(false);
+        categoriaProdutoRepository.save(categoriaProduto);
+    }
+
+    public void reativar(Long id) {
+        CategoriaProduto categoriaProduto = buscarPorId(id);
+        categoriaProduto.setAtiva(true);
+        salvar(categoriaProduto);
     }
 }

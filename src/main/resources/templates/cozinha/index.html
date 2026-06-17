@@ -14,16 +14,16 @@
 <body>
 <div class="navbar">
     <strong>Espetaria Barbosa</strong>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/pedidos">Pedidos</a>
-    <a href="/pedidos/novo">Novo Pedido</a>
-    <a href="/clientes">Clientes</a>
-    <a href="/mesas">Mesas</a>
-    <a href="/categorias">Categorias</a>
-    <a href="/produtos">Produtos</a>
-    <a href="/funcionarios">Funcionarios</a>
-    <a href="/cozinha">Cozinha</a>
-    <a href="/painel" target="_blank">Painel TV</a>
+    <a th:if="${canDashboard}" href="/dashboard">Dashboard</a>
+    <a th:if="${canPedidos}" href="/pedidos">Pedidos</a>
+    <a th:if="${canNovoPedido}" href="/pedidos/novo">Novo Pedido</a>
+    <a th:if="${canClientes}" href="/clientes">Clientes</a>
+    <a th:if="${canMesas}" href="/mesas">Mesas</a>
+    <a th:if="${canCadastrosAdmin}" href="/categorias">Categorias</a>
+    <a th:if="${canCadastrosAdmin}" href="/produtos">Produtos</a>
+    <a th:if="${canFuncionarios}" href="/funcionarios">Funcionarios</a>
+    <a th:if="${canCozinha}" href="/cozinha">Cozinha</a>
+    <a th:if="${canPainel}" href="/painel" target="_blank">Painel TV</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
         <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
         <span data-theme-label>Modo light</span>

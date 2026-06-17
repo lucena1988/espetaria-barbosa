@@ -30,6 +30,7 @@ public class MesaController {
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("mesas", mesaService.listarAtivas());
+        model.addAttribute("mesasInativas", mesaService.listarInativas());
         model.addAttribute("mesa", new Mesa());
         model.addAttribute("statusMesas", StatusMesa.values());
         return "mesas/lista";
@@ -66,6 +67,17 @@ public class MesaController {
         try {
             mesaService.excluir(id);
             redirectAttributes.addFlashAttribute("sucesso", "Mesa excluida da tela com sucesso");
+        } catch (RuntimeException exception) {
+            redirectAttributes.addFlashAttribute("erro", exception.getMessage());
+        }
+        return "redirect:/mesas";
+    }
+
+    @PostMapping("/{id}/reativar")
+    public String reativar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            mesaService.reativar(id);
+            redirectAttributes.addFlashAttribute("sucesso", "Mesa reativada com sucesso");
         } catch (RuntimeException exception) {
             redirectAttributes.addFlashAttribute("erro", exception.getMessage());
         }

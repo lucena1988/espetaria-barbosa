@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     List<Cliente> findByAtivoTrueOrderByNomeAsc();
+    List<Cliente> findByAtivoFalseOrderByNomeAsc();
     List<Cliente> findAllByOrderByNomeAsc();
 }

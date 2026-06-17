@@ -13,16 +13,16 @@
 <body>
 <div class="navbar">
     <strong>Espetaria Barbosa</strong>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/pedidos">Pedidos</a>
-    <a href="/pedidos/novo">Novo Pedido</a>
-    <a href="/clientes">Clientes</a>
-    <a href="/mesas">Mesas</a>
-    <a href="/categorias">Categorias</a>
-    <a href="/produtos">Produtos</a>
-    <a href="/funcionarios">Funcionarios</a>
-    <a href="/cozinha">Cozinha</a>
-    <a href="/painel" target="_blank">Painel TV</a>
+    <a th:if="${canDashboard}" href="/dashboard">Dashboard</a>
+    <a th:if="${canPedidos}" href="/pedidos">Pedidos</a>
+    <a th:if="${canNovoPedido}" href="/pedidos/novo">Novo Pedido</a>
+    <a th:if="${canClientes}" href="/clientes">Clientes</a>
+    <a th:if="${canMesas}" href="/mesas">Mesas</a>
+    <a th:if="${canCadastrosAdmin}" href="/categorias">Categorias</a>
+    <a th:if="${canCadastrosAdmin}" href="/produtos">Produtos</a>
+    <a th:if="${canFuncionarios}" href="/funcionarios">Funcionarios</a>
+    <a th:if="${canCozinha}" href="/cozinha">Cozinha</a>
+    <a th:if="${canPainel}" href="/painel" target="_blank">Painel TV</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
         <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
         <span data-theme-label>Modo light</span>
@@ -33,6 +33,9 @@
 </div>
 <div class="container">
     <h1>Clientes</h1>
+
+    <p class="success-message" th:if="${sucesso}" th:text="${sucesso}"></p>
+    <p class="error-message" th:if="${erro}" th:text="${erro}"></p>
 
     <div class="card">
         <h2>Novo Cliente</h2>
@@ -51,7 +54,43 @@
         <p th:if="${cliente.telefone}">Telefone: <span th:text="${cliente.telefone}"></span></p>
         <p th:if="${cliente.endereco}">Endereco: <span th:text="${cliente.endereco}"></span></p>
         <p>Status: <span th:text="${cliente.ativo ? 'Ativo' : 'Inativo'}"></span></p>
+
+        <details class="record-edit-panel">
+            <summary>Editar cliente</summary>
+            <form class="record-edit-form" method="post" th:action="@{/clientes/{id}/editar(id=${cliente.id})}">
+                <input name="nome" th:value="${cliente.nome}" placeholder="Nome do cliente" required>
+                <input name="telefone" th:value="${cliente.telefone}" placeholder="Telefone">
+                <input name="endereco" th:value="${cliente.endereco}" placeholder="Endereco">
+                <button class="btn-secondary" type="submit">Salvar alteracoes</button>
+            </form>
+        </details>
+
+        <form class="record-delete-form"
+              method="post"
+              th:action="@{/clientes/{id}/arquivar(id=${cliente.id})}"
+              onsubmit="return confirm('Deseja excluir este cliente da tela? Pedidos antigos continuam registrados.');">
+            <button class="btn-danger" type="submit">Excluir cliente</button>
+        </form>
     </div>
+
+    <section class="card archived-records" th:if="${!#lists.isEmpty(clientesInativos)}">
+        <div class="section-title-row">
+            <div>
+                <span class="eyebrow">Arquivados</span>
+                <h2>Clientes excluidos da tela</h2>
+            </div>
+        </div>
+
+        <div class="archived-record-row" th:each="cliente : ${clientesInativos}">
+            <div>
+                <strong th:text="${cliente.nome}"></strong>
+                <span th:text="${cliente.telefone ?: 'Sem telefone'}"></span>
+            </div>
+            <form method="post" th:action="@{/clientes/{id}/reativar(id=${cliente.id})}">
+                <button class="btn-secondary" type="submit">Reativar</button>
+            </form>
+        </div>
+    </section>
 </div>
 <script th:src="@{/js/theme.js}"></script>
 </body>

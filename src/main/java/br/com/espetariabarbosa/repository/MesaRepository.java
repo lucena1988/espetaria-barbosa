@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface MesaRepository extends JpaRepository<Mesa, Long> {
     List<Mesa> findByAtivaTrueOrderByNumeroAsc();
+    List<Mesa> findByAtivaFalseOrderByNumeroAsc();
     List<Mesa> findByStatusInAndAtivaTrueOrderByNumeroAsc(List<StatusMesa> status);
     Optional<Mesa> findByNumeroAndAtivaTrue(String numero);
     boolean existsByNumero(String numero);

@@ -17,6 +17,10 @@ public class ProdutoService {
         return produtoRepository.findByAtivoTrueOrderByNomeAsc();
     }
 
+    public List<Produto> listarInativos() {
+        return produtoRepository.findByAtivoFalseOrderByNomeAsc();
+    }
+
     public List<Produto> listarTodos() {
         return produtoRepository.findAll();
     }
@@ -40,6 +44,18 @@ public class ProdutoService {
     public Produto buscarPorId(Long id) {
         return produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto nao encontrado"));
+    }
+
+    public void excluir(Long id) {
+        Produto produto = buscarPorId(id);
+        produto.setAtivo(false);
+        produtoRepository.save(produto);
+    }
+
+    public void reativar(Long id) {
+        Produto produto = buscarPorId(id);
+        produto.setAtivo(true);
+        salvar(produto);
     }
 
     public void baixarEstoque(Produto produto, Integer quantidade) {

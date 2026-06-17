@@ -13,16 +13,16 @@
 <body>
 <div class="navbar">
     <strong>Espetaria Barbosa</strong>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/pedidos">Pedidos</a>
-    <a href="/pedidos/novo">Novo Pedido</a>
-    <a href="/clientes">Clientes</a>
-    <a href="/mesas">Mesas</a>
-    <a href="/categorias">Categorias</a>
-    <a href="/produtos">Produtos</a>
-    <a href="/funcionarios">Funcionarios</a>
-    <a href="/cozinha">Cozinha</a>
-    <a href="/painel" target="_blank">Painel TV</a>
+    <a th:if="${canDashboard}" href="/dashboard">Dashboard</a>
+    <a th:if="${canPedidos}" href="/pedidos">Pedidos</a>
+    <a th:if="${canNovoPedido}" href="/pedidos/novo">Novo Pedido</a>
+    <a th:if="${canClientes}" href="/clientes">Clientes</a>
+    <a th:if="${canMesas}" href="/mesas">Mesas</a>
+    <a th:if="${canCadastrosAdmin}" href="/categorias">Categorias</a>
+    <a th:if="${canCadastrosAdmin}" href="/produtos">Produtos</a>
+    <a th:if="${canFuncionarios}" href="/funcionarios">Funcionarios</a>
+    <a th:if="${canCozinha}" href="/cozinha">Cozinha</a>
+    <a th:if="${canPainel}" href="/painel" target="_blank">Painel TV</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
         <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
         <span data-theme-label>Modo light</span>
@@ -75,13 +75,17 @@
             </form>
 
             <div class="mesa-actions">
-                <form class="mesa-rename-form" method="post" th:action="@{/mesas/{id}/renomear(id=${mesa.id})}">
-                    <input name="numero" th:value="${mesa.numero}" placeholder="Nome da mesa" required>
-                    <input name="descricao" th:value="${mesa.descricao}" placeholder="Descricao opcional">
-                    <button class="btn-secondary" type="submit">Renomear</button>
-                </form>
+                <details class="record-edit-panel">
+                    <summary>Editar mesa</summary>
+                    <form class="record-edit-form" method="post" th:action="@{/mesas/{id}/renomear(id=${mesa.id})}">
+                        <input name="numero" th:value="${mesa.numero}" placeholder="Nome da mesa" required>
+                        <input name="descricao" th:value="${mesa.descricao}" placeholder="Descricao opcional">
+                        <button class="btn-secondary" type="submit">Salvar alteracoes</button>
+                    </form>
+                </details>
 
                 <form method="post"
+                      class="record-delete-form"
                       th:action="@{/mesas/{id}/excluir(id=${mesa.id})}"
                       onsubmit="return confirm('Deseja excluir esta mesa da tela? Pedidos antigos continuam registrados.');">
                     <button class="btn-danger" type="submit">Excluir mesa</button>
@@ -89,6 +93,25 @@
             </div>
         </div>
     </div>
+
+    <section class="card archived-records" th:if="${!#lists.isEmpty(mesasInativas)}">
+        <div class="section-title-row">
+            <div>
+                <span class="eyebrow">Arquivadas</span>
+                <h2>Mesas excluidas da tela</h2>
+            </div>
+        </div>
+
+        <div class="archived-record-row" th:each="mesa : ${mesasInativas}">
+            <div>
+                <strong th:text="${mesa.numero}"></strong>
+                <span th:text="${mesa.descricao ?: 'Sem descricao'}"></span>
+            </div>
+            <form method="post" th:action="@{/mesas/{id}/reativar(id=${mesa.id})}">
+                <button class="btn-secondary" type="submit">Reativar</button>
+            </form>
+        </div>
+    </section>
 </div>
 <script th:src="@{/js/theme.js}"></script>
 </body>

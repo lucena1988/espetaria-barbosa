@@ -13,16 +13,16 @@
 <body>
 <div class="navbar">
     <strong>Espetaria Barbosa</strong>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/pedidos">Pedidos</a>
-    <a href="/pedidos/novo">Novo Pedido</a>
-    <a href="/clientes">Clientes</a>
-    <a href="/mesas">Mesas</a>
-    <a href="/categorias">Categorias</a>
-    <a href="/produtos">Produtos</a>
-    <a href="/funcionarios">Funcionarios</a>
-    <a href="/cozinha">Cozinha</a>
-    <a href="/painel" target="_blank">Painel TV</a>
+    <a th:if="${canDashboard}" href="/dashboard">Dashboard</a>
+    <a th:if="${canPedidos}" href="/pedidos">Pedidos</a>
+    <a th:if="${canNovoPedido}" href="/pedidos/novo">Novo Pedido</a>
+    <a th:if="${canClientes}" href="/clientes">Clientes</a>
+    <a th:if="${canMesas}" href="/mesas">Mesas</a>
+    <a th:if="${canCadastrosAdmin}" href="/categorias">Categorias</a>
+    <a th:if="${canCadastrosAdmin}" href="/produtos">Produtos</a>
+    <a th:if="${canFuncionarios}" href="/funcionarios">Funcionarios</a>
+    <a th:if="${canCozinha}" href="/cozinha">Cozinha</a>
+    <a th:if="${canPainel}" href="/painel" target="_blank">Painel TV</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" title="Alternar tema">
         <span class="theme-icon" data-theme-icon aria-hidden="true">D</span>
         <span data-theme-label>Modo light</span>
@@ -44,7 +44,7 @@
             <input name="username" placeholder="Usuario de login" required>
             <input name="senha" type="password" placeholder="Senha" required>
             <select name="perfil" required>
-                <option th:each="perfil : ${perfis}" th:value="${perfil}" th:text="${perfil}"></option>
+                <option th:each="perfil : ${perfis}" th:value="${perfil}" th:text="${perfil.descricao}"></option>
             </select>
             <button type="submit">Cadastrar Funcionario</button>
         </form>
@@ -55,8 +55,36 @@
     <div class="card" th:each="funcionario : ${funcionarios}">
         <h3 th:text="${funcionario.nome}"></h3>
         <p>Usuario: <span th:text="${funcionario.username}"></span></p>
-        <p>Perfil: <span th:text="${funcionario.perfil}"></span></p>
+        <p>Perfil: <span th:text="${funcionario.perfil.descricao}"></span></p>
         <p>Status: <span th:text="${funcionario.ativo ? 'Ativo' : 'Inativo'}"></span></p>
+
+        <details class="record-edit-panel">
+            <summary>Editar funcionario</summary>
+            <form class="record-edit-form" method="post" th:action="@{/funcionarios/{id}/editar(id=${funcionario.id})}">
+                <input name="nome" th:value="${funcionario.nome}" placeholder="Nome" required>
+                <input name="username" th:value="${funcionario.username}" placeholder="Usuario de login" required>
+                <input name="senha" type="password" placeholder="Nova senha (opcional)">
+                <select name="perfil" required>
+                    <option th:each="perfil : ${perfis}"
+                            th:value="${perfil}"
+                            th:selected="${perfil == funcionario.perfil}"
+                            th:text="${perfil.descricao}">
+                    </option>
+                </select>
+                <button class="btn-secondary" type="submit">Salvar alteracoes</button>
+            </form>
+        </details>
+
+        <form class="record-delete-form"
+              method="post"
+              th:action="@{/funcionarios/{id}/status(id=${funcionario.id})}"
+              onsubmit="return confirm('Deseja alterar o status deste funcionario?');">
+            <button th:class="${funcionario.ativo} ? 'btn-danger' : 'btn-secondary'"
+                    type="submit"
+                    th:text="${funcionario.ativo} ? 'Desativar funcionario' : 'Ativar funcionario'">
+                Alterar status
+            </button>
+        </form>
     </div>
 </div>
 <script th:src="@{/js/theme.js}"></script>

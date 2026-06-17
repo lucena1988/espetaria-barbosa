@@ -17,6 +17,10 @@ public class ClienteService {
         return clienteRepository.findByAtivoTrueOrderByNomeAsc();
     }
 
+    public List<Cliente> listarInativos() {
+        return clienteRepository.findByAtivoFalseOrderByNomeAsc();
+    }
+
     public List<Cliente> listarTodos() {
         return clienteRepository.findAllByOrderByNomeAsc();
     }
@@ -31,5 +35,17 @@ public class ClienteService {
     public Cliente buscarPorId(Long id) {
         return clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente nao encontrado"));
+    }
+
+    public void arquivar(Long id) {
+        Cliente cliente = buscarPorId(id);
+        cliente.setAtivo(false);
+        clienteRepository.save(cliente);
+    }
+
+    public void reativar(Long id) {
+        Cliente cliente = buscarPorId(id);
+        cliente.setAtivo(true);
+        salvar(cliente);
     }
 }

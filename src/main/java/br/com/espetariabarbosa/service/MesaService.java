@@ -29,6 +29,10 @@ public class MesaService {
         return mesaRepository.findByAtivaTrueOrderByNumeroAsc();
     }
 
+    public List<Mesa> listarInativas() {
+        return mesaRepository.findByAtivaFalseOrderByNumeroAsc();
+    }
+
     public List<Mesa> listarDisponiveisParaPedido() {
         return mesaRepository.findByStatusInAndAtivaTrueOrderByNumeroAsc(
                 List.of(StatusMesa.LIVRE, StatusMesa.OCUPADA)
@@ -81,6 +85,18 @@ public class MesaService {
 
         mesa.setAtiva(false);
         mesa.setStatus(StatusMesa.INATIVA);
+        mesaRepository.save(mesa);
+    }
+
+    public void reativar(Long id) {
+        Mesa mesa = buscarPorId(id);
+
+        if (mesaRepository.findByNumeroAndAtivaTrue(mesa.getNumero()).isPresent()) {
+            throw new RuntimeException("Ja existe uma mesa ativa com esse nome");
+        }
+
+        mesa.setAtiva(true);
+        mesa.setStatus(StatusMesa.LIVRE);
         mesaRepository.save(mesa);
     }
 

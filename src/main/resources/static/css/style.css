@@ -662,6 +662,84 @@ button:disabled {
     border-left-color: var(--danger);
 }
 
+.record-edit-panel,
+.product-edit-panel {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 10px;
+}
+
+.record-edit-panel summary,
+.product-edit-panel summary {
+    color: var(--amber);
+    cursor: pointer;
+    font-weight: 900;
+}
+
+.record-edit-form,
+.product-edit-form {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    margin-top: 10px;
+}
+
+.record-edit-form input,
+.record-edit-form select,
+.product-edit-form input,
+.product-edit-form select {
+    margin: 0;
+}
+
+.record-delete-form,
+.product-delete-form {
+    border-top: 1px solid var(--line-soft);
+    margin: 12px 0 0;
+    padding-top: 12px;
+}
+
+.record-delete-form .btn-danger,
+.product-delete-form .btn-danger {
+    width: 100%;
+}
+
+.archived-records,
+.archived-products {
+    display: grid;
+    gap: 10px;
+}
+
+.archived-record-row,
+.archived-product-row {
+    align-items: center;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 1fr auto;
+    padding: 10px;
+}
+
+.archived-record-row div,
+.archived-product-row div {
+    display: grid;
+    gap: 3px;
+}
+
+.archived-record-row span,
+.archived-product-row span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.archived-record-row form,
+.archived-product-row form {
+    margin: 0;
+}
+
 .stock-badge {
     border-radius: 999px;
     display: inline-block;
@@ -1190,6 +1268,8 @@ body:has(.public-menu) {
     .merge-order-form,
     .order-item-row,
     .mesa-rename-form,
+    .archived-record-row,
+    .archived-product-row,
     .payment-layout,
     .payment-row,
     .status-form,

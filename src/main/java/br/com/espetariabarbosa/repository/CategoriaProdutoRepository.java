@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface CategoriaProdutoRepository extends JpaRepository<CategoriaProduto, Long> {
     List<CategoriaProduto> findByAtivaTrueOrderByNomeAsc();
+    List<CategoriaProduto> findByAtivaFalseOrderByNomeAsc();
     List<CategoriaProduto> findAllByOrderByNomeAsc();
 }
